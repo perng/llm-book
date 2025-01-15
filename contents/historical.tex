@@ -1,0 +1,109 @@
+\label{sec:historical}
+\noindent
+Language modeling has been a central challenge in Natural Language Processing (NLP) for decades. Researchers have continually sought methods to better predict or generate text based on observed patterns in language data. In this section, we examine the progression of language models, starting from the simplicity of n-gram models and moving toward the transformative impact of modern large-scale Transformer-based architectures.
+
+
+\subsection{Early Language Models (n-grams)}
+\label{sec:early_n_grams}
+% PROMPT: Explain what n-grams are and how they paved the way for more advanced language models
+
+\noindent
+An \textbf{n-gram} model is one of the earliest approaches to language modeling. It is based on the \emph{Markov assumption}, which simplifies the probability of the next word in a sequence by conditioning only on a fixed number of preceding words. Specifically, an n-gram model approximates the probability of a word $w_t$ given its entire history $\{w_1, w_2, \ldots, w_{t-1}\}$ by considering only the previous $n-1$ words:
+
+\[
+P(w_t \mid w_1, w_2, \ldots, w_{t-1}) \approx P(w_t \mid w_{t-(n-1)}, \ldots, w_{t-1}).
+\]
+
+\noindent
+Here, $n$ indicates how many words (or tokens) we look back in the sequence. The simplest examples include:
+\begin{itemize}
+    \item \textbf{Unigram model ($n = 1$):}
+    \[
+    P(w_t) \approx \text{frequency of } w_t,
+    \]
+    which ignores any context and simply assigns probabilities based on overall word frequencies.
+
+    \item \textbf{Bigram model ($n = 2$):}
+    \[
+    P(w_t \mid w_{t-1}) \approx \frac{\text{count}(w_{t-1}, w_t)}{\text{count}(w_{t-1})},
+    \]
+    where the probability of $w_t$ depends only on the immediately preceding word $w_{t-1}$.
+
+    \item \textbf{Trigram model ($n = 3$):}
+    \[
+    P(w_t \mid w_{t-1}, w_{t-2}) \approx \frac{\text{count}(w_{t-2}, w_{t-1}, w_t)}{\text{count}(w_{t-2}, w_{t-1})}.
+    \]
+\end{itemize}
+
+\noindent
+While these models offer a simple yet effective approach for small-scale language tasks, they suffer from several drawbacks:
+\begin{enumerate}
+    \item \textbf{Data Sparsity.} As $n$ increases, the number of possible n-grams grows exponentially, making it extremely difficult to obtain reliable probability estimates from finite data. Many n-grams may never appear in the training corpus, leading to zero probabilities.
+    \item \textbf{Limited Context Window.} Even with higher-order n-grams, the model can only capture a short context window. This limitation means the model struggles to handle long-range dependencies or global context in a sentence or document.
+    \item \textbf{Smoothing Techniques.} To address sparsity, methods such as \emph{Laplace smoothing}, \emph{Kneser-Ney smoothing}, and others are commonly employed. However, these strategies merely mitigate the issue and do not fundamentally solve the limitations of the n-gram framework.
+\end{enumerate}
+
+\noindent
+Despite their simplicity and shortcomings, n-gram models laid an important foundation for statistical language modeling. They introduced fundamental ideas such as using frequency counts and conditional probabilities for word prediction. These core principles influenced the development of more sophisticated neural language models that emerged with the advent of deeper architectures, larger corpora, and more powerful computational resources.
+
+\subsection{Transition to Neural Language Models}
+\label{sec:transition_nn_models}
+% PROMPT: Discuss the shift from statistical approaches to neural network-based language models
+
+\noindent
+While n-gram models offered a foundational statistical approach to language modeling, they were increasingly limited by their inability to capture long-range dependencies. This shortcoming, in tandem with growing computational capabilities, paved the way for \textbf{neural language models}. Unlike n-gram models, which rely on explicit counts of co-occurrences, neural models learn continuous vector representations (embeddings) that capture semantic relationships between words in a high-dimensional space.
+
+\begin{itemize}
+    \item \textbf{The Introduction of Distributed Representations.}
+    Pioneering work by \emph{Bengio et al.} introduced the concept of learned word embeddings, replacing one-hot word vectors with dense, low-dimensional representations. This shift helped alleviate data sparsity and allowed models to generalize better to unseen n-grams by placing related words closer together in the embedding space.
+
+    \item \textbf{The Rise of Recurrent Neural Networks (RNNs).}
+    RNN-based architectures quickly became a popular choice for sequence modeling. By maintaining a hidden state that is updated at each time step, RNNs can theoretically encode information from all previous tokens in a sequence. 
+    \begin{itemize}
+        \item \textit{Vanilla RNNs} often faced vanishing or exploding gradients when handling long sequences, leading to difficulties in capturing context over longer spans of text.
+        \item \textit{Long Short-Term Memory (LSTM)} networks and \textit{Gated Recurrent Units (GRUs)} introduced gating mechanisms to mitigate these gradient issues, enabling better information flow across many time steps.
+    \end{itemize}
+    Despite their improvements over n-gram models, RNN-based architectures were still computationally intensive, often needing sequential processing for each token.
+
+    \item \textbf{Introduction of Word2Vec and Glove.}
+    Around the same time, \texttt{Word2Vec} and \texttt{Glove} emerged as popular methods for learning distributed word representations outside of a full neural language model framework. These methods optimized simpler objectives (e.g., skip-gram, continuous bag-of-words, or global co-occurrence matrices) to produce embeddings that captured semantic and syntactic regularities.
+
+    \item \textbf{Limitations and the Search for Parallelism.}
+    Although RNNs and LSTMs represented a breakthrough in language modeling, they remained sequential in nature—each token’s representation depended on the previous token’s output. This sequential dependency limited parallelization and made training on extremely large corpora slow and costly. Researchers began to explore alternative architectures that could better exploit GPU parallelism and handle longer contexts without exponential growth in training time.
+\end{itemize}
+
+\noindent
+In short, the transition to neural language models marked a pivotal moment in NLP, broadening the scope of what language models could achieve. By leveraging distributed representations and more flexible architectures, these models began to surpass traditional statistical methods on a range of language tasks. However, it would take the subsequent step of discarding recurrence altogether and introducing the \textbf{attention mechanism} before truly massive-scale language models, often referred to as \textit{Large Language Models}, could flourish.
+
+\subsection{The Emergence of Transformers and LLMs}
+\label{sec:transformers_llms}
+% PROMPT: Highlight how the Transformer architecture revolutionized NLP and led to massive LLMs
+
+\noindent
+Building on the foundations laid by RNN-based approaches, the \textbf{Transformer} architecture, introduced by \emph{Vaswani et al.} in 2017, marked a paradigm shift in Natural Language Processing (NLP). Instead of relying on recurrent connections (or convolutions) to process sequences, Transformers use a fully \emph{attention-based} mechanism to model complex dependencies in parallel. This design not only alleviated many of the bottlenecks found in RNNs but also enabled significant performance improvements across a broad spectrum of NLP tasks.
+
+\begin{itemize}
+    \item \textbf{Key Innovation: Self-Attention.} 
+    The Transformer’s core operation, called \textit{self-attention}, allows the model to weigh the importance of different parts of a sequence to each other \emph{in parallel}, without processing tokens one at a time. This is especially advantageous for capturing long-range dependencies since each token can “attend to” any other token directly. Moreover, it opens the door for massively parallel computations on modern GPUs or TPUs.
+
+    \item \textbf{Positional Encoding and Multi-Head Attention.}
+    Because Transformers discard recurrence, they need a method to encode the order of tokens in a sequence. \emph{Positional encoding} injects information about token positions through either sinusoidal or learned embeddings. The model also employs \textit{multi-head attention}, which processes attention in multiple parallel subspaces, allowing it to capture diverse relationships within the input.
+
+    \item \textbf{Scalability and Performance.}
+    With attention-based operations, Transformers proved substantially more scalable than RNNs. Training could be distributed over large GPU clusters, and the architecture could handle \emph{very} long context windows effectively. This scalability was quickly exploited by researchers and industry practitioners, who trained Transformers on massive text corpora, producing what are now commonly called \textbf{Large Language Models (LLMs)}.
+
+    \item \textbf{Examples of LLMs: BERT, GPT, and Beyond.}
+    Since the debut of the Transformer, several influential LLMs have emerged:
+    \begin{itemize}
+        \item \textit{BERT (Bidirectional Encoder Representations from Transformers)} demonstrated the power of masked language modeling for capturing bidirectional context, achieving state-of-the-art results on numerous NLP benchmarks.
+        \item \textit{GPT (Generative Pretrained Transformer)} focused on unidirectional (left-to-right) language modeling, enabling impressive generative capabilities and pioneering few-shot and zero-shot learning approaches when scaled up (e.g., GPT-2, GPT-3).
+        \item Subsequent models (e.g., \textit{T5, XLNet, RoBERTa}) introduced new training objectives, larger parameter counts, and improved performances on benchmarks from question answering to machine translation.
+    \end{itemize}
+
+    \item \textbf{Impact on the Field.}
+    The rise of LLMs profoundly changed NLP research and practice. Tasks that once required domain-specific feature engineering began to be addressed by general-purpose, pre-trained Transformers fine-tuned with minimal additional data. Moreover, LLMs have revealed surprising emergent properties in natural language understanding, reasoning, and even creative text generation—motivating research into interpretability, bias mitigation, and ethical deployment.
+
+\end{itemize}
+
+\noindent
+In essence, the Transformer and its descendants ushered in a new age of NLP, where models capable of \emph{scaling} to billions (and even trillions) of parameters dominate the landscape. As we explore these architectures further in subsequent chapters, we will highlight the key mathematical concepts and training strategies that have enabled LLMs to become a cornerstone of modern AI applications.

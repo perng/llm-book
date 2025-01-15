@@ -1,0 +1,406 @@
+\documentclass[12pt]{book}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{minted}
+\usepackage{enumitem}
+\setlist{noitemsep}
+
+\usepackage{tcolorbox}
+\tcbuselibrary{listings,minted,skins}
+
+\newtcblisting{pythoncode}{
+  listing engine=minted,
+  colback=blue!5!white,
+  colframe=blue!75!black,
+  listing only,
+  minted language=python,
+  minted options={fontsize=\small,breaklines,autogobble,linenos,numbersep=3mm},
+  left=5mm,
+  enhanced,
+  title=Python Implementation,
+  arc=0.3mm,
+  boxrule=0.8pt
+}
+
+
+\title{A Mathematical Introduction to Large Language Models}
+\author{Author Name}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\part{Foundations}
+% PROMPT: Introduce the overall scope and purpose of the book
+
+\chapter{Introduction to Large Language Models}
+% PROMPT: Provide historical milestones of LLM development
+\input{contents/historical.tex}
+% PROMPT: Expand on the evolution from n-gram models to modern Transformers
+
+
+% PROMPT: Compare small language models to large language models in more detail
+\input{contents/what_makes_llms_different.tex}
+
+% PROMPT: Provide a roadmap of the book’s structure
+\input{contents/book_organization.tex}
+
+
+\chapter{Essential Mathematics}
+% PROMPT: Summarize key linear algebra concepts needed for LLMs
+\section{Linear Algebra}
+\begin{itemize}
+    \item Vector spaces, norms, and inner products
+    \item Matrices: multiplication, inversion, eigenvalues/eigenvectors
+    \item Decompositions: SVD and PCA in the context of dimensionality reduction
+\end{itemize}
+
+% PROMPT: Connect calculus topics to neural network training
+\section{Calculus Refresher}
+\begin{itemize}
+    \item Derivatives and gradients
+    \item Chain rule and partial derivatives
+    \item Vector calculus essentials (Jacobian, Hessian)
+\end{itemize}
+
+% PROMPT: Provide additional probability examples relevant to NLP
+\section{Probability and Statistics}
+\begin{itemize}
+    \item Basic probability distributions (Gaussian, Bernoulli, etc.)
+    \item Expected values and variance
+    \item Entropy and cross-entropy
+\end{itemize}
+
+% PROMPT: Include hands-on matrix factorization examples
+\section{Exercises and Examples}
+\begin{itemize}
+    \item Hands-on linear algebra manipulations (e.g., matrix factorization)
+    \item Simple probability calculations relevant to language modeling
+\end{itemize}
+
+
+\chapter{Machine Learning Fundamentals}
+% PROMPT: Provide code examples of popular loss functions
+
+\input{contents/review_of_supervised_and_unsupervised_learning.tex}
+% \begin{itemize}
+%     \item Loss functions (MSE, cross-entropy)
+%     \item Gradient descent and its variants (SGD, momentum, Adam)
+% \end{itemize}
+
+% PROMPT: Showcase a minimal neural network from scratch
+% \section{Neural Networks 101}
+\input{contents/neural_networks_101.tex}
+% \begin{itemize}
+%     \item Perceptrons, MLPs, activation functions
+%     \item Forward/backpropagation mechanics
+%     \item Optimization challenges (vanishing/exploding gradients, overfitting)
+% \end{itemize}
+
+% PROMPT: Elaborate on how regularization techniques help in NLP
+\section{Regularization and Generalization}
+\begin{itemize}
+    \item Dropout, weight decay
+    \item Early stopping
+    \item Data augmentation (in NLP context)
+\end{itemize}
+
+
+\part{Transformer Architecture and Attention}
+% PROMPT: Introduce the concept of attention in a broader ML context
+
+\chapter{The Attention Mechanism}
+% PROMPT: Show step-by-step derivation of the dot-product attention formula
+\section{Self-Attention Defined}
+\begin{itemize}
+    \item Query, key, value formulation
+    \item Dot-product attention math
+    \item Masked self-attention for sequence tasks
+\end{itemize}
+
+% PROMPT: Justify the scaling factor in scaled dot-product attention
+\section{Scaled Dot-Product Attention}
+\begin{itemize}
+    \item Why scaling is important
+    \item Softmax temperature
+    \item Complexity analysis
+\end{itemize}
+
+% PROMPT: Provide a small example demonstrating multi-head attention outputs
+\section{Multi-Head Attention}
+\begin{itemize}
+    \item Splitting and recombining embeddings
+    \item Benefits of multiple attention heads
+    \item Mathematical notation for multi-head attention
+\end{itemize}
+
+
+\chapter{Transformer Encoder-Decoder Structure}
+% PROMPT: Compare sinusoidal to learned positional embeddings
+\section{Positional Encodings}
+\begin{itemize}
+    \item Sinusoidal positional embeddings: the math behind them
+    \item Alternative positional encoding methods
+\end{itemize}
+
+% PROMPT: Expand on the role of layer normalization
+\section{Encoder Block}
+\begin{itemize}
+    \item Layer normalization and its role in stable training
+    \item Residual connections: rationale and benefits
+\end{itemize}
+
+% PROMPT: Clarify the difference between encoder self-attention and decoder self-attention
+\section{Decoder Block}
+\begin{itemize}
+    \item Masked multi-head attention
+    \item Encoder-decoder cross-attention
+    \item Combining outputs for language generation
+\end{itemize}
+
+% PROMPT: Collect all the main formulas for easy reference
+\section{Mathematical Notation of the Transformer}
+\begin{itemize}
+    \item Putting it all together with formulas (layer norms, attention, feedforward)
+\end{itemize}
+
+
+\part{Training Large Language Models}
+% PROMPT: Discuss large-scale data pipelines in brief
+
+\chapter{Language Modeling and Pretraining Objectives}
+% PROMPT: Differentiate cross-entropy loss from perplexity
+\section{Statistical Language Modeling}
+\begin{itemize}
+    \item Maximum likelihood estimation (MLE) for next-token prediction
+    \item Cross-entropy loss and perplexity
+\end{itemize}
+
+% PROMPT: Outline how partial masking affects training stability
+\section{Masked Language Modeling (MLM)}
+\begin{itemize}
+    \item BERT-style masked token prediction
+    \item The math behind partial conditioning
+\end{itemize}
+
+% PROMPT: Emphasize left-to-right modeling for generation tasks
+\section{Causal Language Modeling (CLM)}
+\begin{itemize}
+    \item GPT-style left-to-right prediction
+    \item Training objective and computational considerations
+\end{itemize}
+
+% PROMPT: Compare objectives like next sentence prediction and permutation LM
+\section{Next Sentence Prediction, Permutation LM, and Other Objectives}
+\begin{itemize}
+    \item How objectives influence model’s learned representations
+\end{itemize}
+
+
+\chapter{Large-Scale Optimization Techniques}
+% PROMPT: Explain how mini-batch size impacts convergence
+\section{Stochastic Gradient Descent at Scale}
+\begin{itemize}
+    \item Mini-batch sizing and distributed training
+    \item Memory considerations (gradient checkpoints, etc.)
+\end{itemize}
+
+% PROMPT: Compare Adam, AdamW, and LAMB in a tabular format
+\section{Adaptive Optimizers}
+\begin{itemize}
+    \item Adam, AdamW, LAMB, and their update rules
+    \item Convergence issues and practical tips
+\end{itemize}
+
+% PROMPT: Provide a short tutorial on implementing mixed-precision training
+\section{Gradient Accumulation and Mixed Precision Training}
+\begin{itemize}
+    \item FP16 vs. FP32
+    \item Trade-offs between speed and numerical stability
+\end{itemize}
+
+% PROMPT: Show an example of learning rate warm-up schedule
+\section{Hyperparameter Tuning}
+\begin{itemize}
+    \item Learning rate schedules (warm-up, decay)
+    \item Regularization in large-scale settings
+\end{itemize}
+
+
+\chapter{Scaling Laws and Model Behavior}
+% PROMPT: Cite recent papers on scaling laws
+\section{Scaling Relationships}
+\begin{itemize}
+    \item Empirical laws for model size vs. performance
+    \item Data size requirements
+    \item Diminishing returns and capacity
+\end{itemize}
+
+% PROMPT: Theorize why overparameterization can sometimes improve generalization
+\section{Mathematical Intuition for Overparameterization}
+\begin{itemize}
+    \item Why bigger might be better (lottery ticket hypothesis, double descent)
+    \item Inductive biases learned by LLMs
+\end{itemize}
+
+% PROMPT: Mention typical hardware setups for large-scale training
+\section{Practical Constraints}
+\begin{itemize}
+    \item Hardware limitations (GPU/TPU memory, compute time)
+    \item Budgeting for training
+\end{itemize}
+
+
+\part{Advanced Topics and Future Directions}
+% PROMPT: Highlight cutting-edge research in LLMs
+
+\chapter{Fine-Tuning and Prompt Engineering}
+% PROMPT: Show a side-by-side comparison of full fine-tuning vs. LoRA
+\section{Methods of Fine-Tuning}
+\begin{itemize}
+    \item Full fine-tuning vs. parameter-efficient techniques (LoRA, adapters)
+    \item Continual learning and catastrophic forgetting
+\end{itemize}
+
+% PROMPT: Demonstrate a few-shot prompting scenario
+\section{Prompt Engineering and In-Context Learning}
+\begin{itemize}
+    \item Few-shot and zero-shot prompting
+    \item The math behind attention re-weighting due to prompts
+\end{itemize}
+
+% PROMPT: Recommend metrics for zero-shot vs. fine-tuned models
+\section{Evaluation Metrics and Challenges}
+\begin{itemize}
+    \item BLEU, ROUGE, perplexity, and beyond
+    \item Human vs. automated evaluations
+\end{itemize}
+
+
+\chapter{Emergent Abilities and Interpretability}
+% PROMPT: Give examples of complex reasoning tasks LLMs can handle
+\section{Emergent Behaviors}
+\begin{itemize}
+    \item “Chain-of-thought” reasoning and large model capabilities
+    \item Breakdown of tasks that LLMs excel at vs. struggle with
+\end{itemize}
+
+% PROMPT: Provide a sample attention visualization
+\section{Interpretability Tools}
+\begin{itemize}
+    \item Attention visualization, gradient-based explanation
+    \item Attribution methods (Integrated Gradients, etc.)
+\end{itemize}
+
+% PROMPT: Discuss how to measure and mitigate bias in LLMs
+\section{Safety, Bias, and Ethics}
+\begin{itemize}
+    \item Mathematical perspectives on bias measurement
+    \item Calibration, uncertainty, and fairness metrics
+\end{itemize}
+
+
+\chapter{Efficient Serving and Deployment}
+% PROMPT: Compare quantization methods (e.g., 8-bit, 4-bit)
+\section{Model Distillation and Compression}
+\begin{itemize}
+    \item Teacher-student framework
+    \item Quantization, pruning, and the math behind it
+\end{itemize}
+
+% PROMPT: Illustrate how to handle batching during inference
+\section{Latency Considerations}
+\begin{itemize}
+    \item Transformer inference optimizations (kernel fusion, GPU acceleration)
+    \item Batch vs. streaming inference
+\end{itemize}
+
+% PROMPT: Propose different deployment strategies for large-scale LLMs
+\section{Serving Architectures}
+\begin{itemize}
+    \item Distributed serving strategies
+    \item Memory sharing and caching for LLMs
+\end{itemize}
+
+
+\chapter{Future Directions in Large Language Models}
+% PROMPT: Explore new avenues of research in multimodality
+\section{Multimodal Extensions}
+\begin{itemize}
+    \item Visual language models, audio-text models
+    \item Cross-modal attention math
+\end{itemize}
+
+% PROMPT: Show how RLHF is formulated as a policy optimization problem
+\section{Integration with Reinforcement Learning}
+\begin{itemize}
+    \item RLHF (Reinforcement Learning from Human Feedback)
+    \item Policy gradients in the context of language generation
+\end{itemize}
+
+% PROMPT: Point to unsolved theoretical questions about LLM scaling
+\section{Open Research Questions}
+\begin{itemize}
+    \item Efficient scaling, interpretability, and unsolved challenges
+    \item Potential theoretical breakthroughs
+\end{itemize}
+
+
+\part{Conclusion and Resources}
+% PROMPT: Summarize the key takeaways of the book
+
+\chapter{Conclusion and Next Steps}
+% PROMPT: Recap the most important mathematical concepts in a concise manner
+\section{Summary of Key Mathematical Concepts}
+\begin{itemize}
+    \item From linear algebra to advanced optimization
+\end{itemize}
+
+% PROMPT: Provide concrete tips on bridging theory and practice
+\section{Bridging Theory and Practice}
+\begin{itemize}
+    \item Implementation tips, code libraries, and frameworks
+\end{itemize}
+
+% PROMPT: Suggest external resources for continued learning
+\section{Recommended Resources}
+\begin{itemize}
+    \item Research papers, online courses, open-source repositories
+\end{itemize}
+
+% PROMPT: Conclude with a futuristic perspective on LLMs
+\section{Looking Ahead}
+\begin{itemize}
+    \item The ongoing evolution of LLM capabilities
+    \item Encouraging readers to contribute to the field
+\end{itemize}
+
+
+\appendix
+% PROMPT: Include proofs of key mathematical results in detail
+\chapter{Mathematical Proofs and Derivations}
+\begin{itemize}
+    \item Detailed proofs for key theorems (e.g., convergence of optimization algorithms)
+    \item Concentration inequalities for large models
+\end{itemize}
+
+% PROMPT: Provide a quick reference for all the mathematical symbols used
+\chapter{Notation Guide}
+\begin{itemize}
+    \item Symbols used throughout the book
+\end{itemize}
+
+% PROMPT: Define important terms used in the text
+\chapter{Glossary of Terms}
+\begin{itemize}
+    \item Definitions of key terms in deep learning, NLP, and mathematics
+\end{itemize}
+
+\end{document}

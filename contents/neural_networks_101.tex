@@ -1,0 +1,100 @@
+\section{Neural Networks 101}
+\label{sec:neural_networks_101}
+% PROMPT: Showcase a minimal neural network from scratch
+
+\noindent
+Neural networks have revolutionized modern machine learning by learning \emph{non-linear} mappings from input features to output predictions without the need for manually engineered features. In the context of language modeling, neural networks are particularly powerful because they can encode and combine linguistic features in high-dimensional spaces, capturing nuances that simpler statistical models may overlook.
+
+\subsection{Perceptrons and Multi-Layer Perceptrons (MLPs)}
+\noindent
+The \textbf{perceptron}, introduced by Frank Rosenblatt in the late 1950s, is one of the earliest forms of a trainable neural network. It models a single neuron with:
+\begin{enumerate}
+    \item A set of input weights.
+    \item A linear combination of inputs and weights.
+    \item A non-linear activation function (e.g., step function).
+\end{enumerate}
+While a single perceptron can only represent linear decision boundaries, stacking multiple perceptrons in layers (known as a \textbf{Multi-Layer Perceptron}, or MLP) allows for the modeling of highly complex, non-linear relationships.
+
+\begin{itemize}
+    \item \textbf{Input Layer.} Receives the raw features, such as token embeddings in NLP.
+    \item \textbf{Hidden Layers.} Non-linear transformations are applied in each layer. Common activation functions include $\text{ReLU}, \tanh, \text{sigmoid}$.
+    \item \textbf{Output Layer.} Produces the final prediction, such as a probability distribution over the next token for language modeling.
+\end{itemize}
+
+\subsection{Forward and Backpropagation}
+\noindent
+Learning in neural networks typically involves two main steps:
+\begin{itemize}
+    \item \textbf{Forward Propagation.} The input $\mathbf{x}$ is propagated through each layer of the network to compute an output $\hat{\mathbf{y}}$. Mathematically, for layer $l$ with weights $\mathbf{W}^{(l)}$ and bias $\mathbf{b}^{(l)}$,
+    \[
+        \mathbf{z}^{(l)} = \mathbf{W}^{(l)} \mathbf{h}^{(l-1)} + \mathbf{b}^{(l)}, \quad \mathbf{h}^{(l)} = \sigma(\mathbf{z}^{(l)}),
+    \]
+    where $\sigma(\cdot)$ is a non-linear activation function, and $\mathbf{h}^{(0)} \equiv \mathbf{x}$ is the input vector.
+
+    \item \textbf{Backward Propagation (Backprop).} Once a loss function $\mathcal{L}(\hat{\mathbf{y}}, \mathbf{y})$ is computed—where $\mathbf{y}$ is the ground-truth label—the gradient of $\mathcal{L}$ w.r.t. each parameter in the network is calculated using the chain rule. Parameters are updated via an optimization algorithm (e.g., \textit{Stochastic Gradient Descent}, \textit{Adam}), moving them in the direction that reduces the loss.
+\end{itemize}
+
+\noindent
+This loop of forward and backward propagation, repeated over multiple \emph{epochs} of training data, enables a neural network to \emph{learn} complex transformations—an essential capability for tasks like language modeling.
+
+\subsection{Activation Functions}
+\noindent
+Activation functions impart non-linearity, allowing neural networks to model non-trivial functions. Common activation choices include:
+\begin{itemize}
+    \item \textbf{ReLU (Rectified Linear Unit):} $\sigma(z) = \max(0, z)$. Efficient and popular, though it can cause `dying ReLU’ issues.
+    \item \textbf{Sigmoid:} $\sigma(z) = \frac{1}{1+e^{-z}}$. Outputs values in $(0,1)$, but can saturate for large $|z|$.
+    \item \textbf{Tanh:} A shifted and scaled version of the sigmoid function, outputs values in $(-1, 1)$. Also prone to saturation.
+\end{itemize}
+
+\subsection{Minimal Neural Network Example}
+\noindent
+Below is a minimal example in pseudocode (or a Python-like syntax) of a single hidden-layer neural network for a binary classification task:
+
+\begin{verbatim}
+# Define network architecture
+input_size = D
+hidden_size = H
+output_size = 1  # for binary classification
+
+# Initialize parameters
+W1 = random_normal([D, H])
+b1 = zeros([H])
+W2 = random_normal([H, output_size])
+b2 = zeros([output_size])
+
+# Forward pass function
+def forward(x):
+    z1 = x @ W1 + b1
+    h1 = relu(z1)
+    z2 = h1 @ W2 + b2
+    return sigmoid(z2)
+
+# Training loop (simplified)
+for epoch in range(num_epochs):
+    for x_batch, y_batch in data_loader:
+        # Forward pass
+        y_pred = forward(x_batch)
+        # Compute loss (e.g., binary cross-entropy)
+        loss = -mean( y_batch * log(y_pred) + (1 - y_batch) * log(1 - y_pred) )
+        
+        # Backprop (automatic differentiation or manually computed)
+        # grads = compute_gradients(loss, [W1, b1, W2, b2])
+        
+        # Parameter update
+        # update_parameters([W1, b1, W2, b2], grads, learning_rate)
+\end{verbatim}
+
+\noindent
+While this example is basic, the core ideas of forward propagation, loss computation, and backpropagation remain the same in more advanced architectures used in modern NLP tasks.
+
+\subsection{Optimization Challenges}
+\noindent
+Despite their remarkable flexibility, neural networks are not without pitfalls. Common optimization challenges include:
+\begin{itemize}
+    \item \textbf{Vanishing/Exploding Gradients.} Deeper networks or RNNs may run into gradient magnitudes that become either too small or too large, slowing or destabilizing training.
+    \item \textbf{Overfitting.} A network with many parameters can easily memorize the training data. Techniques such as \emph{dropout}, \emph{weight decay}, and \emph{batch normalization} help mitigate overfitting.
+    \item \textbf{Choosing Hyperparameters.} Finding the right learning rate, batch size, and network architecture often involves empirical experimentation.
+\end{itemize}
+
+\noindent
+Understanding these fundamental concepts is crucial before diving into more specialized architectures, such as Transformers. By grounding ourselves in the mechanics of standard neural networks, we lay the foundation for comprehending how modern LLMs leverage and extend these principles to handle vast amounts of textual data at massive scales.

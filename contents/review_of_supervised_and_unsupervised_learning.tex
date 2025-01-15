@@ -1,0 +1,207 @@
+\section{Review of Supervised and Unsupervised Learning}
+\label{sec:review_of_supervised_and_unsupervised_learning}
+
+Before diving into the specifics of Large Language Models, it's helpful to review the fundamental concepts of supervised and unsupervised learning, as these form the foundation for understanding more complex machine learning systems.
+
+\subsection{Supervised Learning}
+
+Supervised learning is a paradigm where models learn from labeled data pairs $(x, y)$, where $x$ represents the input features and $y$ represents the target output. The goal is to learn a function $f$ that maps inputs to outputs: $f: X \rightarrow Y$.
+
+\subsubsection{Key Characteristics}
+\begin{itemize}[noitemsep]
+    \item Requires labeled training data
+    \item Has clear evaluation metrics
+    \item Learns explicit input-output mappings
+\end{itemize}
+
+\subsubsection{Common Applications}
+\begin{itemize}[noitemsep]
+    \item Classification (e.g., spam detection, image recognition)
+    \item Regression (e.g., price prediction, temperature forecasting)
+    \item Sequence labeling (e.g., part-of-speech tagging)
+\end{itemize}
+
+\subsubsection{Loss Functions}
+In supervised learning, loss functions quantify how well our model's predictions match the true values. Different tasks require different loss functions:
+
+\paragraph{Mean Squared Error (MSE)}
+Commonly used for regression tasks, MSE measures the average squared difference between predictions and true values:
+
+\[ MSE = \frac{1}{n}\sum_{i=1}^n (y_i - \hat{y}_i)^2 \]
+
+Figure \ref{fig:mse_implementation} shows a simple NumPy implementation of MSE loss.
+
+\begin{figure}[h]
+\begin{pythoncode}
+import numpy as np
+
+def mse_loss(y_true, y_pred):
+    return np.mean((y_true - y_pred) ** 2)
+
+# Example usage
+y_true = np.array([1.0, 2.0, 3.0])
+y_pred = np.array([1.1, 2.2, 2.8])
+loss = mse_loss(y_true, y_pred)  # Output: 0.05
+\end{pythoncode}
+\caption{Implementation of Mean Squared Error loss function}
+\label{fig:mse_implementation}
+\end{figure}
+
+\paragraph{Cross-Entropy Loss}
+Used primarily for classification tasks, cross-entropy loss measures the difference between predicted probability distributions and true labels:
+
+\[ H(y, \hat{y}) = -\sum_{i=1}^n y_i \log(\hat{y}_i) \]
+
+The implementation of cross-entropy loss with numerical stability considerations is shown in Figure \ref{fig:cross_entropy_implementation}.
+
+\begin{figure}[h]
+\begin{pythoncode}
+def cross_entropy_loss(y_true, y_pred):
+    # Add small epsilon to avoid log(0)
+    epsilon = 1e-15
+    y_pred = np.clip(y_pred, epsilon, 1 - epsilon)
+    return -np.sum(y_true * np.log(y_pred))
+
+# Example for binary classification
+y_true = np.array([1, 0, 1])
+y_pred = np.array([0.9, 0.1, 0.8])
+loss = cross_entropy_loss(y_true, y_pred)
+\end{pythoncode}
+\caption{Implementation of Cross-Entropy loss function with numerical stability}
+\label{fig:cross_entropy_implementation}
+\end{figure}
+
+\subsubsection{Optimization Algorithms}
+The process of minimizing loss functions typically involves gradient descent and its variants.
+
+\paragraph{Stochastic Gradient Descent (SGD)}
+Basic SGD updates parameters using the gradient of the loss with respect to each parameter:
+
+\[ \theta_{t+1} = \theta_t - \eta \nabla_\theta J(\theta) \]
+
+A basic implementation of SGD is shown in Figure \ref{fig:sgd_implementation}.
+
+\begin{figure}[h]
+\begin{pythoncode}
+def sgd_update(params, grads, learning_rate=0.01):
+    return params - learning_rate * grads
+
+# Example usage
+weights = np.array([0.5, -0.2, 0.1])
+gradients = np.array([0.1, -0.05, 0.02])
+weights = sgd_update(weights, gradients)
+\end{pythoncode}
+\caption{Implementation of basic Stochastic Gradient Descent}
+\label{fig:sgd_implementation}
+\end{figure}
+
+\paragraph{SGD with Momentum}
+Momentum helps accelerate SGD by accumulating a velocity vector in directions of persistent reduction in the objective. Figure \ref{fig:momentum_implementation} demonstrates the implementation of SGD with momentum.
+
+\begin{figure}[h]
+\begin{pythoncode}
+def sgd_momentum_update(params, velocity, grads, 
+                       learning_rate=0.01, momentum=0.9):
+    velocity = momentum * velocity - learning_rate * grads
+    return params + velocity, velocity
+
+# Example usage
+weights = np.array([0.5, -0.2, 0.1])
+velocity = np.zeros_like(weights)
+gradients = np.array([0.1, -0.05, 0.02])
+weights, velocity = sgd_momentum_update(weights, velocity, gradients)
+\end{pythoncode}
+\caption{Implementation of SGD with Momentum}
+\label{fig:momentum_implementation}
+\end{figure}
+
+\paragraph{Adam Optimizer}
+Adam combines ideas from momentum and RMSprop, maintaining per-parameter learning rates. The implementation with bias correction is shown in Figure \ref{fig:adam_implementation}.
+
+\begin{figure}[h]
+\begin{pythoncode}
+def adam_update(params, m, v, grads, t, 
+                learning_rate=0.001, beta1=0.9, beta2=0.999):
+    epsilon = 1e-8
+    
+    # Update biased first moment estimate
+    m = beta1 * m + (1 - beta1) * grads
+    # Update biased second moment estimate
+    v = beta2 * v + (1 - beta2) * grads**2
+    
+    # Bias correction
+    m_hat = m / (1 - beta1**t)
+    v_hat = v / (1 - beta2**t)
+    
+    # Update parameters
+    params = params - learning_rate * m_hat / (np.sqrt(v_hat) + epsilon)
+    return params, m, v
+
+# Example usage
+weights = np.array([0.5, -0.2, 0.1])
+m = np.zeros_like(weights)
+v = np.zeros_like(weights)
+gradients = np.array([0.1, -0.05, 0.02])
+t = 1  # timestep
+weights, m, v = adam_update(weights, m, v, gradients, t)
+\end{pythoncode}
+\caption{Implementation of Adam optimizer with bias correction}
+\label{fig:adam_implementation}
+\end{figure}
+
+\subsection{Practical Considerations}
+
+When implementing these optimization algorithms, several factors should be considered:
+
+\begin{itemize}[noitemsep]
+    \item Learning rate selection is crucial and often requires tuning
+    \item Batch size affects both training stability and computational efficiency
+    \item Initialization of parameters can significantly impact convergence
+    \item Regularization techniques help prevent overfitting
+\end{itemize}
+
+\subsection{Unsupervised Learning}
+
+Unsupervised learning involves finding patterns or structure in unlabeled data. Unlike supervised learning, there are no explicit target outputs to learn from.
+
+\subsubsection{Key Characteristics}
+\begin{itemize}[noitemsep]
+    \item Works with unlabeled data
+    \item Focuses on finding patterns and structure
+    \item Often more exploratory in nature
+\end{itemize}
+
+\subsubsection{Common Applications}
+\begin{itemize}[noitemsep]
+    \item Clustering (e.g., customer segmentation)
+    \item Dimensionality reduction (e.g., PCA, t-SNE)
+    \item Anomaly detection
+\end{itemize}
+
+\subsection{The Bridge to Language Models}
+
+Understanding these fundamental learning paradigms is crucial for grasping how Large Language Models work, as they incorporate aspects of both:
+
+\begin{itemize}[noitemsep]
+    \item Like supervised learning, LLMs learn patterns from input-output pairs during pre-training (e.g., predicting the next word)
+    \item Like unsupervised learning, they discover latent patterns and structures in language without explicit labeling
+    \item They introduce new concepts like self-supervision, where the supervision signal is automatically derived from the input data itself
+\end{itemize}
+
+\subsection{Key Differences in Scale and Approach}
+
+Traditional supervised and unsupervised learning typically operate on:
+\begin{itemize}[noitemsep]
+    \item Smaller, carefully curated datasets
+    \item Well-defined problem spaces
+    \item Specific tasks with clear evaluation metrics
+\end{itemize}
+
+In contrast, modern LLMs:
+\begin{itemize}[noitemsep]
+    \item Use massive datasets (billions of tokens)
+    \item Learn general-purpose representations
+    \item Can adapt to multiple tasks without task-specific training
+\end{itemize}
+
+This foundation in classical machine learning concepts helps us better understand both the innovations and limitations of modern language models, which we'll explore in subsequent chapters. 
