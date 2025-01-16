@@ -19,7 +19,7 @@
     \node[matrix] (QK) at (3,1) {$\mathbf{QK}^\top$};
     
     % Scaling
-    \node[matrix] (scaled) at (6,1) {$\frac{\mathbf{QK}^\top}{\sqrt{d_k}}$};
+    \node[matrix] (scaled) at (5.5,1) {$\frac{\mathbf{QK}^\top}{\sqrt{d_k}}$};
     
     % Softmax
     \node[matrix] (softmax) at (9,1) {softmax};
@@ -28,11 +28,11 @@
     \node[matrix] (output) at (12,0) {Output};
     
     % Arrows and labels
-    \draw[->] (Q) -- node[above] {multiply} (QK);
-    \draw[->] (K) -- node[below] {transpose} (QK);
+    \draw[->] (Q) -- node[above, xshift=10pt] {multiply} (QK);
+    \draw[->] (K) -- node[below, yshift=-10pt] {transpose} (QK);
     \draw[->] (QK) -- node[above] {scale} (scaled);
     \draw[->] (scaled) -- node[above] {normalize} (softmax);
-    \draw[->] (softmax) -- node[above] {multiply} (output);
+    \draw[->] (softmax) -- node[above, xshift=10pt] {multiply} (output);
     \draw[->] (V) -- (output);
 \end{tikzpicture}
 \caption{Scaled Dot-Product Attention Mechanism: The process transforms query ($\mathbf{Q}$), key ($\mathbf{K}$), and value ($\mathbf{V}$) matrices into attention-weighted outputs through matrix multiplication, scaling, and softmax normalization.}
