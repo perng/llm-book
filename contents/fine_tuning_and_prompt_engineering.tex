@@ -1,0 +1,127 @@
+\chapter{Fine-Tuning and Prompt Engineering}
+\label{chap:fine_tuning_prompt}
+
+\noindent
+Modern Large Language Models (LLMs) are typically trained on massive corpora in a self-supervised manner, after which they can be adapted to specific tasks or domains via \textbf{fine-tuning} or \textbf{prompt engineering}. This chapter explores different approaches to fine-tuning—both full and parameter-efficient—and demonstrates how strategically designed prompts can elicit strong zero-shot and few-shot performance from LLMs.
+
+% PROMPT: Show a side-by-side comparison of full fine-tuning vs. LoRA
+\section{Methods of Fine-Tuning}
+\label{sec:methods_finetune}
+
+\noindent
+Fine-tuning typically involves updating a model’s parameters on a target dataset after it has been pre-trained on a large, diverse corpus. However, \emph{full fine-tuning} can be computationally expensive and may risk overfitting on smaller datasets. Recent research has introduced \textbf{parameter-efficient} approaches that significantly reduce the number of trainable parameters while preserving performance.
+
+\subsubsection*{Full Fine-Tuning vs. LoRA (High-Level Comparison)}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{0.25\textwidth} | p{0.3\textwidth} p{0.3\textwidth}}
+\hline
+\textbf{Aspect} & \textbf{Full Fine-Tuning} & \textbf{LoRA} \\ \hline
+\textbf{Trainable Parameters} 
+& \(\sim\!100\%\) of the model’s parameters are updated 
+& Only a small fraction of parameters (low-rank matrices) are updated \\
+
+\textbf{Memory Footprint} 
+& High: must store and backprop through all parameters 
+& Low: minimal overhead; the base model can be frozen \\
+
+\textbf{Speed of Training} 
+& Slower, as gradients must be computed for all layers 
+& Faster, due to fewer trainable parameters \\
+
+\textbf{Risk of Overfitting} 
+& Potentially higher, especially with small datasets 
+& Lower, since fewer parameters adapt \& the rest remain fixed \\
+
+\textbf{Common Use Cases} 
+& When you have a large dataset and enough compute to adapt the entire model 
+& When compute/memory are limited or the target dataset is relatively small \\ \hline
+\end{tabular}
+\end{center}
+
+\subsection{Low-Rank Adaptation (LoRA)}
+\label{subsec:lora}
+\input{contents/lora.tex}
+
+\subsection{Other Parameter-Efficient Methods}
+\noindent
+Beyond LoRA, several other techniques aim to reduce the computational and memory costs of fine-tuning:
+\begin{itemize}
+    \item \textbf{Adapters.} Introduced in the context of computer vision and NLP, \emph{adapters} insert small “bottleneck” layers in each block of a Transformer. Only these adapter layers are trained, while the rest of the parameters remain frozen.
+    \item \textbf{Prompt Tuning / Prefix Tuning.} Instead of modifying the model’s core parameters, special “prompt” or “prefix” tokens are learned and prepended to the input sequence. The base model weights remain static, relying on these learned vectors to steer predictions.
+    \item \textbf{BitFit.} Proposes fine-tuning only the bias terms in each layer, drastically reducing the parameter footprint while retaining moderate performance.
+\end{itemize}
+
+\noindent
+All these methods share a common goal: retain most of the pre-trained model’s knowledge while introducing minimal, task-specific parameter updates. This can be crucial when dealing with large models where full fine-tuning becomes prohibitively expensive.
+
+% PROMPT: Demonstrate a few-shot prompting scenario
+\section{Prompt Engineering and In-Context Learning}
+\label{sec:prompt_engineering}
+
+\noindent
+\textbf{Prompt engineering} manipulates the input context presented to an LLM to guide its output behavior, often without updating any model parameters at all. This approach relies on the idea of \emph{in-context learning}: the model’s attention mechanism can glean instructions and few-shot examples directly from the prompt.
+
+\subsection{Few-Shot and Zero-Shot Prompting}
+\begin{itemize}
+    \item \textbf{Zero-Shot Prompting.} The model is given only a task description or question without explicit in-task examples. For instance:
+\begin{verbatim}
+"Explain in simple terms why the sky is blue."
+\end{verbatim}
+    \item \textbf{Few-Shot Prompting.} A small number of demonstrations (input-output examples) are included in the prompt. For example:
+\begin{verbatim}
+ Q: What is the capital of France? 
+ A: Paris
+
+ Q: What is the capital of Germany?
+ A: Berlin
+\end{verbatim}
+  The model observes the pattern (question -> answer) and often completes the final answer correctly.
+\end{itemize}
+
+\noindent
+\textbf{Why It Works:} The multi-head self-attention in Transformers effectively reweights relevant parts of the prompt. This “hint” or “instruction” setup can drastically improve performance on tasks for which the model hasn’t been explicitly fine-tuned.
+
+\subsection{The Math Behind Attention Re-Weighting}
+\noindent
+When you prepend or inject prompt tokens into the sequence, they become part of the \(\mathbf{Q}, \mathbf{K}, \mathbf{V}\) matrices in the \textbf{scaled dot-product attention}:
+\[
+\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) 
+= 
+\text{softmax}\Bigl(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d_k}}\Bigr)\,\mathbf{V}.
+\]
+The inserted prompt tokens can influence:
+\begin{itemize}
+    \item Which tokens the model “attends” to in a few-shot example (keys/values).
+    \item How strongly the model weights certain prompt tokens (queries).
+\end{itemize}
+In effect, the \emph{prompt} guides the attention distribution to emulate training examples on the fly.
+
+% PROMPT: Recommend metrics for zero-shot vs. fine-tuned models
+\section{Evaluation Metrics and Challenges}
+\label{sec:metrics_challenges}
+
+\subsection{BLEU, ROUGE, Perplexity, and Beyond}
+\noindent
+When assessing the quality of outputs—whether from zero-shot prompts or fine-tuned models—common \textbf{automatic metrics} include:
+\begin{itemize}
+    \item \textbf{BLEU (Bilingual Evaluation Understudy).} Measures n-gram overlap between generated text and reference translations; popular in machine translation.
+    \item \textbf{ROUGE (Recall-Oriented Understudy for Gisting Evaluation).} Focuses on recall of n-grams or sequences for summarization tasks.
+    \item \textbf{Perplexity (PPL).} Often used to gauge how well the language model predicts a sequence. Lower perplexity means the model is less “surprised” by the data.
+    \item \textbf{Other Task-Specific Metrics.} Accuracy, F1-score, or exact match for classification and QA tasks; meteor, CIDEr, or SPICE for image-caption tasks.
+\end{itemize}
+
+\subsection{Human vs. Automated Evaluations}
+\noindent
+\textbf{Automatic metrics} are convenient but may not capture nuanced qualities such as factual correctness, coherence, and style. For tasks like open-ended generation or complex QA, \textbf{human evaluations} often remain the gold standard:
+\begin{itemize}
+    \item \textbf{Annotator Bias.} Human reviewers might be inconsistent or exhibit bias in judging model outputs, necessitating structured guidelines or multiple reviewers.
+    \item \textbf{Cost and Scalability.} Large-scale human evaluations are expensive and time-consuming, so hybrid approaches that combine automatic filtering with targeted human checks are common.
+\end{itemize}
+
+\noindent
+In practice, balancing \emph{automated metrics} with periodic \emph{human assessments} tends to yield the best insights into an LLM’s true capabilities and limitations—especially in scenarios where precision and reliability are paramount.
+
+\bigskip
+\noindent
+\textbf{Summary.} Fine-tuning and prompt engineering represent two complementary paths to adapt powerful pre-trained LLMs to specific tasks and contexts. While full fine-tuning modifies all of a model’s parameters, LoRA and other parameter-efficient techniques drastically reduce resource demands. Meanwhile, effective prompting can elicit strong few-shot and zero-shot performance without altering a single weight. By coupling these adaptation methods with appropriate evaluation strategies, practitioners can leverage the full breadth of modern LLMs’ capabilities. 

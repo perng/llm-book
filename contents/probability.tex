@@ -1,0 +1,74 @@
+\section{Probability and Statistics}
+\label{sec:probability}
+% PROMPT: Provide additional probability examples relevant to NLP
+
+\noindent
+A solid foundation in \textbf{probability and statistics} is essential for understanding the uncertainty and data-driven nature of Large Language Models (LLMs). From modeling word occurrences to designing training objectives, probabilistic principles guide many decisions in NLP. This section covers the key distributions, moments, and information-theoretic measures that frequently appear in machine learning.
+
+\subsection{Basic Probability Distributions (Gaussian, Bernoulli, etc.)}
+\noindent
+\begin{itemize}
+    \item \textbf{Bernoulli Distribution.}
+    The Bernoulli distribution models binary outcomes (success or failure) with parameter $p$:
+    \begin{equation}\label{eq:bernoulli}
+    P(X = 1) = p, \quad P(X = 0) = 1-p.
+    \end{equation}
+    In an NLP context, a Bernoulli distribution might represent whether a certain token appears in a sample or not.
+
+    \item \textbf{Binomial Distribution.}
+    A generalization of Bernoulli, the binomial distribution describes the probability of $k$ successes in $n$ independent Bernoulli trials. It can be useful for modeling counts of specific word occurrences in text.
+
+    \item \textbf{Gaussian (Normal) Distribution.}
+    One of the most ubiquitous distributions, the Gaussian distribution with mean $\mu$ and variance $\sigma^2$ is given by:
+    \[
+    p(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} \exp\Bigl(-\frac{(x-\mu)^2}{2 \sigma^2}\Bigr).
+    \]
+    In machine learning, Gaussian assumptions often arise in error terms or in the initialization of parameters. Although text generation does not strictly follow a Gaussian process, Gaussian priors or noise models are sometimes used in model regularization.
+
+    \item \textbf{Multinomial Distribution.}
+    In language tasks, a token at each position often follows a categorical (special case of the multinomial) distribution over the vocabulary. This distribution defines probabilities for each category (word) without assuming any ordinal relationships among them.
+\end{itemize}
+
+\subsection{Expected Values and Variance}
+\noindent
+\textbf{Expected value} (mean) and \textbf{variance} are the first two moments of a distribution, providing a concise summary of its central tendency and spread:
+\begin{itemize}
+    \item \textbf{Expected Value (Mean).} 
+    For a random variable $X$,
+    \[
+    \mathbb{E}[X] = \sum_x x \, P(X = x) \quad \text{(discrete)}, \quad
+    \mathbb{E}[X] = \int_{-\infty}^{\infty} x \, p(x) \, dx \quad \text{(continuous)}.
+    \]
+    In NLP, expectations often appear when averaging losses or computing gradients.
+
+    \item \textbf{Variance.} 
+    The variance measures how spread out the values of $X$ are around $\mathbb{E}[X]$:
+    \[
+    \mathrm{Var}(X) = \mathbb{E}\bigl[(X - \mathbb{E}[X])^2\bigr].
+    \]
+    Understanding variance helps in assessing model stability—high-variance estimates might indicate an overfitted or poorly calibrated model.
+\end{itemize}
+
+\subsection{Entropy and Cross-Entropy}
+\noindent
+\textbf{Entropy} and \textbf{cross-entropy} are crucial concepts in information theory and form the backbone of many loss functions in machine learning—particularly in classification and language modeling:
+
+\begin{itemize}
+    \item \textbf{Entropy.}
+    Entropy measures the uncertainty inherent in a random variable’s distribution. For a discrete distribution $p(x)$ over possible outcomes $x \in \{1, 2, \ldots, K\}$, the entropy is:
+    \[
+    H(p) = - \sum_{x=1}^{K} p(x) \log p(x).
+    \]
+    A higher entropy implies the outcomes are more unpredictable. In language modeling, an entropy-based metric called \emph{perplexity} is commonly used to gauge how well the model predicts test data.
+
+    \item \textbf{Cross-Entropy.}
+    Cross-entropy between two distributions $p$ (true) and $q$ (predicted) is defined as:
+    \[
+    H(p, q) = - \sum_{x=1}^{K} p(x) \log q(x).
+    \]
+    In a classification setting—such as predicting the next token among a vocabulary of size $K$—this reduces to the familiar negative log-likelihood loss when $p$ is a one-hot vector. Minimizing cross-entropy encourages the model to output high probabilities for the correct tokens.
+
+\end{itemize}
+
+\noindent
+By grasping these fundamentals—probability distributions, expected values, and measures of uncertainty—readers will be equipped to understand the statistical underpinnings of language modeling objectives. These principles also serve as a starting point for more advanced topics, such as Bayesian methods, uncertainty quantification, and robust estimation techniques in large-scale NLP systems.

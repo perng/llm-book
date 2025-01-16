@@ -1,8 +1,6 @@
 \section{Review of Supervised and Unsupervised Learning}
 \label{sec:review_of_supervised_and_unsupervised_learning}
 
-Before diving into the specifics of Large Language Models, it's helpful to review the fundamental concepts of supervised and unsupervised learning, as these form the foundation for understanding more complex machine learning systems.
-
 \subsection{Supervised Learning}
 
 Supervised learning is a paradigm where models learn from labeled data pairs $(x, y)$, where $x$ represents the input features and $y$ represents the target output. The goal is to learn a function $f$ that maps inputs to outputs: $f: X \rightarrow Y$.
@@ -32,7 +30,7 @@ Commonly used for regression tasks, MSE measures the average squared difference 
 Figure \ref{fig:mse_implementation} shows a simple NumPy implementation of MSE loss.
 
 \begin{figure}[h]
-\begin{pythoncode}
+\begin{pythoncode}[Mean Squared Error Implementation]
 import numpy as np
 
 def mse_loss(y_true, y_pred):
@@ -55,7 +53,7 @@ Used primarily for classification tasks, cross-entropy loss measures the differe
 The implementation of cross-entropy loss with numerical stability considerations is shown in Figure \ref{fig:cross_entropy_implementation}.
 
 \begin{figure}[h]
-\begin{pythoncode}
+\begin{pythoncode}[Cross-Entropy Loss Implementation]
 def cross_entropy_loss(y_true, y_pred):
     # Add small epsilon to avoid log(0)
     epsilon = 1e-15
@@ -82,7 +80,7 @@ Basic SGD updates parameters using the gradient of the loss with respect to each
 A basic implementation of SGD is shown in Figure \ref{fig:sgd_implementation}.
 
 \begin{figure}[h]
-\begin{pythoncode}
+\begin{pythoncode}[Stochastic Gradient Descent Implementation]
 def sgd_update(params, grads, learning_rate=0.01):
     return params - learning_rate * grads
 
@@ -99,7 +97,7 @@ weights = sgd_update(weights, gradients)
 Momentum helps accelerate SGD by accumulating a velocity vector in directions of persistent reduction in the objective. Figure \ref{fig:momentum_implementation} demonstrates the implementation of SGD with momentum.
 
 \begin{figure}[h]
-\begin{pythoncode}
+\begin{pythoncode}[SGD with Momentum Implementation]
 def sgd_momentum_update(params, velocity, grads, 
                        learning_rate=0.01, momentum=0.9):
     velocity = momentum * velocity - learning_rate * grads
@@ -119,7 +117,7 @@ weights, velocity = sgd_momentum_update(weights, velocity, gradients)
 Adam combines ideas from momentum and RMSprop, maintaining per-parameter learning rates. The implementation with bias correction is shown in Figure \ref{fig:adam_implementation}.
 
 \begin{figure}[h]
-\begin{pythoncode}
+\begin{pythoncode}[Adam Optimizer Implementation]
 def adam_update(params, m, v, grads, t, 
                 learning_rate=0.001, beta1=0.9, beta2=0.999):
     epsilon = 1e-8

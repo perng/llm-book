@@ -1,0 +1,88 @@
+\section{Calculus Refresher}
+\label{sec:calculus_refresher}
+% PROMPT: Connect calculus topics to neural network training
+
+\noindent
+\textbf{Calculus} plays a critical role in training neural networks, as it provides the tools for understanding how small changes in parameters affect a model’s output and loss function. In this section, we review the fundamental topics—derivatives, gradients, the chain rule, and essential concepts from vector calculus—that underpin the optimization of Large Language Models (LLMs).
+
+\subsection{Derivatives and Gradients}
+\noindent
+In single-variable calculus, the \textbf{derivative} of a function $f(x)$ measures how $f$ changes in response to a small change in $x$. Formally:
+\[
+\frac{d}{dx} f(x) = \lim_{\Delta x \to 0} \frac{f(x + \Delta x) - f(x)}{\Delta x}.
+\]
+In the context of neural networks, we often deal with \textbf{gradients}, which generalize derivatives to functions of multiple variables. For a function $F(\mathbf{x})$ where $\mathbf{x} \in \mathbb{R}^n$,
+\[
+\nabla_\mathbf{x} F(\mathbf{x}) = 
+\begin{bmatrix}
+\frac{\partial F}{\partial x_1} \\
+\frac{\partial F}{\partial x_2} \\
+\vdots \\
+\frac{\partial F}{\partial x_n}
+\end{bmatrix}.
+\]
+Gradients point in the direction of steepest ascent in the function’s domain. In \emph{gradient descent}—a fundamental optimization algorithm for neural networks—we move parameters in the direction \emph{opposite} to the gradient to minimize a loss function.
+
+\subsection{Chain Rule and Partial Derivatives}
+\noindent
+In a neural network, outputs are typically composed through layers of functions. The \textbf{chain rule} enables us to compute how a change in a parameter affects the final output or loss. For a function $F(g(x))$, the chain rule in single-variable form is:
+\[
+\frac{d}{dx} F\bigl(g(x)\bigr)
+= F'\bigl(g(x)\bigr) \times g'(x).
+\]
+In multiple dimensions, this extends to \textbf{partial derivatives}. Consider a function
+\[
+F(\mathbf{x}) = F(x_1, x_2, \ldots, x_n),
+\]
+where each $x_i$ might itself be a function of other variables. The chain rule in this context ensures we properly account for each path by which a parameter influences the final output. This idea is central to \emph{backpropagation}, where partial derivatives are propagated backward through the computational graph of a neural network.
+
+\subsection{Vector Calculus Essentials (Jacobian, Hessian)}
+\noindent
+\textbf{Vector calculus} provides more advanced structures that further describe how functions change in multidimensional spaces:
+
+\begin{itemize}
+    \item \textbf{Jacobian Matrix.}
+    For a vector-valued function $\mathbf{f}: \mathbb{R}^n \rightarrow \mathbb{R}^m$, the Jacobian matrix $\mathbf{J} \in \mathbb{R}^{m \times n}$ is defined as:
+    \[
+    \mathbf{J} = 
+    \begin{bmatrix}
+    \frac{\partial f_1}{\partial x_1} & \frac{\partial f_1}{\partial x_2} & \cdots & \frac{\partial f_1}{\partial x_n} \\
+    \frac{\partial f_2}{\partial x_1} & \frac{\partial f_2}{\partial x_2} & \cdots & \frac{\partial f_2}{\partial x_n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{\partial f_m}{\partial x_1} & \frac{\partial f_m}{\partial x_2} & \cdots & \frac{\partial f_m}{\partial x_n}
+    \end{bmatrix}.
+    \]
+    In neural network layers, the Jacobian describes how each output dimension changes with respect to each input dimension—useful for understanding transformations between layers.
+
+    \item \textbf{Hessian Matrix.}
+    For a scalar-valued function $F(\mathbf{x})$, the Hessian matrix $\mathbf{H} \in \mathbb{R}^{n \times n}$ is a second-order derivative of $F$:
+    \[
+    \mathbf{H} =
+    \begin{bmatrix}
+    \frac{\partial^2 F}{\partial x_1^2} & \frac{\partial^2 F}{\partial x_1 \partial x_2} & \cdots & \frac{\partial^2 F}{\partial x_1 \partial x_n} \\
+    \frac{\partial^2 F}{\partial x_2 \partial x_1} & \frac{\partial^2 F}{\partial x_2^2} & \cdots & \frac{\partial^2 F}{\partial x_2 \partial x_n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{\partial^2 F}{\partial x_n \partial x_1} & \frac{\partial^2 F}{\partial x_n \partial x_2} & \cdots & \frac{\partial^2 F}{\partial x_n^2}
+    \end{bmatrix}.
+    \]
+    The Hessian captures curvature information of the loss function. While it can be computationally expensive to compute for large neural networks, it plays a role in advanced optimization methods (e.g., second-order methods) and in analyzing convergence properties.
+
+\end{itemize}
+
+\noindent
+These core ideas—derivatives, partial derivatives, chain rule, and vector calculus—are the bedrock of optimization in neural networks. They guide how we update model parameters in response to loss gradients and enable \emph{backpropagation}, the algorithmic engine driving training for LLMs. In subsequent chapters, we’ll see how these calculus concepts come into play when training extremely large-scale models on massive datasets. 
+
+% Gradient definition
+\begin{equation}\label{eq:gradient}
+\nabla f = \left[\frac{\partial f}{\partial x_1}, \frac{\partial f}{\partial x_2}, \ldots, \frac{\partial f}{\partial x_n}\right]^\top
+\end{equation}
+
+% Chain rule
+\begin{equation}\label{eq:chain_rule}
+\frac{\partial L}{\partial w} = \frac{\partial L}{\partial y} \cdot \frac{\partial y}{\partial z} \cdot \frac{\partial z}{\partial w}
+\end{equation}
+
+% Backpropagation equation
+\begin{equation}\label{eq:backprop}
+\frac{\partial L}{\partial \mathbf{W}^{(l)}} = \frac{\partial L}{\partial \mathbf{z}^{(l)}} \cdot \frac{\partial \mathbf{z}^{(l)}}{\partial \mathbf{W}^{(l)}}
+\end{equation} 

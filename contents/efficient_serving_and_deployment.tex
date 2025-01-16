@@ -1,0 +1,96 @@
+\chapter{Efficient Serving and Deployment}
+\label{chap:serving_deployment}
+
+\noindent
+Deploying Large Language Models (LLMs) in real-world applications entails challenges related to \textbf{latency}, \textbf{memory}, and \textbf{scalability}. Although training can be distributed over vast compute clusters, end-user queries demand rapid inference, often with limited hardware resources. This chapter explores \textbf{model compression} techniques like distillation and quantization, discusses strategies for low-latency inference, and outlines architectural approaches for serving large-scale LLMs.
+
+% PROMPT: Compare quantization methods (e.g., 8-bit, 4-bit)
+\section{Model Distillation and Compression}
+\label{sec:distillation_compression}
+
+\subsection{Teacher-Student Framework}
+\noindent
+\textbf{Knowledge distillation} compresses a large “teacher” model into a smaller “student” model by transferring the teacher’s output distribution. Formally, if \(\mathbf{z}_\text{teacher}\) is the teacher’s logits for a given input, and \(\mathbf{z}_\text{student}\) is the student’s logits, we minimize:
+\[
+\mathcal{L}_\text{KD} = \text{KL}\Bigl(\sigma\bigl(\frac{\mathbf{z}_\text{teacher}}{T}\bigr),\, \sigma\bigl(\frac{\mathbf{z}_\text{student}}{T}\bigr)\Bigr),
+\]
+where \(\sigma(\cdot)\) is typically the softmax function and \(T\) is a temperature parameter that smooths distributions. Key advantages include:
+\begin{itemize}
+    \item \textbf{Reduced Model Size.} Smaller models demand fewer parameters and thus less memory at inference.
+    \item \textbf{Retained Performance.} If the student matches teacher outputs well, performance can remain strong on the downstream task.
+    \item \textbf{Faster Inference.} Fewer parameters and a smaller compute graph enable lower-latency predictions.
+\end{itemize}
+
+\subsection{Quantization, Pruning, and the Math Behind It}
+\noindent
+Beyond distillation, \textbf{quantization} and \textbf{pruning} are key strategies to reduce the compute and memory footprint:
+
+\begin{itemize}
+    \item \textbf{Quantization.}
+    \begin{itemize}
+        \item \textbf{8-bit (INT8) Quantization.} We replace 32-bit or 16-bit floating-point weights with 8-bit integers. This significantly lowers memory and speeds up matrix multiplication on specialized hardware. However, some models can suffer an accuracy drop unless quantization-aware training or calibration is applied.
+        \item \textbf{4-bit or Lower.} Further compression is possible with 4-bit quantization, but the risk of information loss grows. Methods like \emph{Adaptive Rounding} and \emph{ZeroQuant} attempt to mitigate accuracy degradation by learning optimal quantization boundaries.
+    \end{itemize}
+
+    \item \textbf{Pruning.}
+    \begin{itemize}
+        \item \textbf{Unstructured Pruning.} Sets a percentage of weights to zero (based on magnitude or other criteria) and stores a sparse matrix representation. This can reduce memory, but speed-ups require specialized sparse-matrix operations.
+        \item \textbf{Structured Pruning.} Removes entire filters or attention heads, yielding a smaller, dense model architecture that more naturally translates to inference speed-ups on standard hardware.
+    \end{itemize}
+\end{itemize}
+
+\noindent
+By combining pruning with quantization (and even distillation), one can achieve considerable compression factors, often with minimal performance loss—especially when the original model has large redundancy.
+
+% PROMPT: Illustrate how to handle batching during inference
+\section{Latency Considerations}
+\label{sec:latency_considerations}
+
+\subsection{Transformer Inference Optimizations (Kernel Fusion, GPU Acceleration)}
+\noindent
+\textbf{Inference latency} can be broken down into:
+\begin{itemize}
+    \item \textbf{Computation Time.} Matrix multiplications for attention and feedforward sub-layers dominate runtime. \emph{Kernel fusion} merges multiple small operations into a single GPU kernel, reducing overhead. 
+    \item \textbf{Memory Transfer.} Minimizing data movement between CPU and GPU is crucial. Techniques like \emph{pinning memory} and \emph{asynchronous transfers} can help.
+    \item \textbf{Caching Key/Value.} For auto-regressive generation, caching past key/value vectors obviates re-computation of entire attention layers at each step, drastically speeding up decoding.
+\end{itemize}
+
+\subsection{Batch vs. Streaming Inference}
+\noindent
+Balancing throughput and latency is often a matter of \textbf{batching} strategy:
+\begin{itemize}
+    \item \textbf{Batch Inference.} Multiple queries are batched together to exploit GPU parallelism. This yields high throughput but can introduce higher latency for individual requests.
+    \item \textbf{Streaming (Real-Time) Inference.} Queries are processed as soon as they arrive, providing lower latency but lower overall throughput. This is common in interactive applications like chatbots or real-time translation.
+\end{itemize}
+
+\noindent
+Systems may dynamically switch between modes or maintain separate services to handle high-throughput vs. low-latency user demands. For example, an application might offer a real-time conversation agent as well as a separate batch processing service for large-scale text generation tasks.
+
+% PROMPT: Propose different deployment strategies for large-scale LLMs
+\section{Serving Architectures}
+\label{sec:serving_architectures}
+
+\subsection{Distributed Serving Strategies}
+\noindent
+When dealing with \textbf{large-scale LLMs}, single-node inference can be insufficient:
+\begin{itemize}
+    \item \textbf{Model Parallelism.} The model is split across multiple GPUs in a single server or across servers, each holding a subset of the parameters. During inference, tensors are exchanged via high-speed interconnects (e.g., NVLink, InfiniBand).
+    \item \textbf{Pipeline Parallelism.} Different layers (or sets of layers) are placed on different devices. Input data flows through the pipeline from layer group to layer group. This approach is effective for very large models but requires careful scheduling to avoid idle devices.
+    \item \textbf{Sharding \& Parameter Server.} A parameter server architecture can store large model parameters in a distributed fashion, with each compute node querying the parameter server for required weights at inference time. 
+\end{itemize}
+
+\subsection{Memory Sharing and Caching for LLMs}
+\noindent
+Even after compression, LLMs can remain too large for single-device deployment. \textbf{Memory sharing} strategies can help:
+\begin{itemize}
+    \item \textbf{Shared CPU/GPU Offloading.} Weights not immediately needed for a token computation can be offloaded to CPU memory, then reloaded when required.
+    \item \textbf{In-Memory Caching of Key-Value Pairs.} For auto-regressive tasks, storing key/value matrices for each user session can enable rapid generation of the next token without recomputing earlier attention states.
+    \item \textbf{Multi-Instance Deployment.} Splitting traffic across multiple instances of the same model can help manage memory footprints while scaling horizontally. A load balancer routes user requests to an available instance, each with a local cache of partial computations.
+\end{itemize}
+
+\noindent
+Choosing the right serving architecture depends on a variety of factors, including \emph{user traffic patterns}, \emph{latency requirements}, and \emph{infrastructure constraints}. By combining compression techniques, GPU optimizations, and parallel serving strategies, organizations can deploy powerful LLMs that meet demanding performance targets without incurring runaway operational costs.
+
+\bigskip
+\noindent
+\textbf{Summary.} Deploying large-scale LLMs in production environments is often as challenging as training them. \emph{Distillation}, \emph{quantization}, and \emph{pruning} help reduce model size and inference time. \emph{Batching}, \emph{streaming}, and \emph{caching} strategies further optimize throughput and latency. Finally, \emph{distributed serving architectures} ensure the model remains responsive even under heavy workloads. Collectively, these approaches form a toolkit for making LLMs both \textbf{efficient} and \textbf{scalable} in real-world applications.

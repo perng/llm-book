@@ -1,0 +1,140 @@
+\chapter{Language Modeling and Pretraining Objectives}
+\noindent
+Scaling to billions (or trillions) of parameters demands specialized optimization strategies. This chapter delves into how mini-batch sizes, adaptive optimizers, and mixed-precision training affect convergence and speed. We also discuss hyperparameter tuning in large-scale environments, offering a roadmap for efficiently training LLMs without sacrificing stability.
+
+
+\label{chap:lm_pretraining}
+% PROMPT: Differentiate cross-entropy loss from perplexity
+
+\noindent
+\textbf{Language modeling} in NLP involves predicting or representing textual data in a way that captures statistical regularities, semantics, and contextual relationships among tokens. In modern LLMs, language modeling objectives underpin pretraining, enabling models to learn general-purpose linguistic representations from large-scale corpora. This chapter discusses the key objectives used in language modeling and how they shape both the training process and the learned representations.
+
+\section{Statistical Language Modeling}
+\label{sec:stat_lm}
+% PROMPT: Differentiate cross-entropy loss from perplexity
+
+\subsection{Maximum Likelihood Estimation (MLE) for Next-Token Prediction}
+\noindent
+A traditional approach to language modeling is to maximize the likelihood of the observed sequence of tokens under the model’s parameters. Given a training corpus of token sequences, we denote each sequence by \(\mathbf{w} = (w_1, w_2, \ldots, w_T)\). Under the \textbf{chain rule} of probability, the joint probability of the sequence is:
+\[
+P(\mathbf{w}) = \prod_{t=1}^{T} P(w_t \mid w_1, w_2, \ldots, w_{t-1}).
+\]
+To train the model, we often minimize the negative log-likelihood of the data:
+\[
+-\log P(\mathbf{w}) = -\sum_{t=1}^{T} \log P(w_t \mid w_1, \ldots, w_{t-1}),
+\]
+which is equivalent to maximizing \(P(\mathbf{w})\) under maximum likelihood estimation (MLE). 
+
+\subsection{Cross-Entropy Loss and Perplexity}
+\noindent
+In practice, we implement this via the \textbf{cross-entropy loss}, commonly denoted as:
+\[
+\mathcal{L}_\text{CE} = -\sum_{t=1}^{T} \log \Bigl( P_{\theta}(w_t \mid w_1, \ldots, w_{t-1}) \Bigr),
+\]
+where \(P_{\theta}\) is the model distribution parameterized by \(\theta\). Cross-entropy compares the model’s predicted distribution over tokens with the true one-hot distribution, penalizing the model when it assigns low probability to the correct token.
+
+\begin{itemize}
+    \item \textbf{Perplexity.}
+    A common metric for language model performance, \emph{perplexity} (PPL) is defined as:
+    \[
+    \text{PPL} = \exp\!\Bigl(\frac{1}{T}\sum_{t=1}^T -\log P_{\theta}(w_t \mid w_{<t})\Bigr).
+    \]
+    Conceptually, perplexity measures the average branching factor of the model’s predictive distribution. A lower perplexity indicates that the model is less “surprised” by the data. 
+    \item \textbf{Cross-Entropy vs. Perplexity.}
+    While cross-entropy \(\mathcal{L}_\text{CE}\) is often used directly as the training objective, perplexity provides an intuitive, exponential-scale view of the model’s uncertainty on test data.
+\end{itemize}
+
+
+\section{Masked Language Modeling (MLM)}
+\label{sec:mlm}
+% PROMPT: Outline how partial masking affects training stability
+
+\subsection{BERT-Style Masked Token Prediction}
+\noindent
+\textbf{Masked Language Modeling (MLM)} is a pretraining objective popularized by BERT. In MLM, a certain percentage of tokens (e.g., 15\%) in a sequence are replaced by a special \texttt{[MASK]} token or, less frequently, by random tokens. The model is then tasked with predicting the original tokens in these masked positions.
+
+\[
+\mathbf{w}_{\text{masked}} = (w_1, \ldots, \texttt{[MASK]}, w_{j}, \ldots),
+\]
+where \(w_i\) is replaced by \texttt{[MASK]} at selected positions \(i\). 
+
+\begin{itemize}
+    \item \textbf{Bidirectional Context.}
+    Since the model can attend to tokens on both the left and right of a masked position, MLM captures bidirectional context more effectively than a strictly left-to-right approach.
+    \item \textbf{Robustness.}
+    By training to predict randomly masked tokens, the model learns more robust token representations, reducing overfitting to specific sequential patterns.
+\end{itemize}
+
+\subsection{The Math Behind Partial Conditioning}
+\noindent
+For each masked position \(i\), the model’s goal is to predict \(w_i\) given the remaining (unmasked) tokens:
+\[
+P(w_i \mid w_1, \ldots, \texttt{[MASK]}, \ldots, w_{j}, \ldots),
+\]
+where all but the masked tokens are visible. The loss is computed over just the masked positions, typically via a cross-entropy objective:
+\[
+\mathcal{L}_\text{MLM} = - \sum_{i \in M} \log P_{\theta}(w_i \mid \mathbf{w}_{\text{masked}}),
+\]
+where \(M\) is the set of masked indices. This \emph{partial conditioning} forces the network to infer the masked token using both left and right context, thus learning more powerful bidirectional representations.
+
+\begin{itemize}
+    \item \textbf{Training Stability.}
+    Partial masking smooths the training signal by updating parameters based on a more varied set of contexts. The ability to predict one token given a surrounding window of unmasked tokens often leads to faster convergence and more robust representations.
+\end{itemize}
+
+
+\section{Causal Language Modeling (CLM)}
+\label{sec:clm}
+% PROMPT: Emphasize left-to-right modeling for generation tasks
+
+\subsection{GPT-Style Left-to-Right Prediction}
+\noindent
+\textbf{Causal Language Modeling (CLM)} is an \emph{auto-regressive} objective in which the model predicts each token \(w_t\) based solely on the preceding tokens \(\{w_1, w_2, \ldots, w_{t-1}\}\). This left-to-right formulation is especially relevant for generative tasks, where the model iteratively generates tokens one after another.
+
+\[
+P(w_t \mid w_1, \ldots, w_{t-1}).
+\]
+\begin{itemize}
+    \item \textbf{GPT Family.}
+    Models like GPT, GPT-2, and GPT-3 use causal language modeling to generate text in a left-to-right fashion. Their impressive generative capabilities stem partly from extensive pretraining on large corpora with this objective.
+\end{itemize}
+
+\subsection{Training Objective and Computational Considerations}
+\noindent
+During training, the model maximizes the log-likelihood of each token given all previous tokens:
+\[
+\mathcal{L}_\text{CLM} = - \sum_{t=1}^{T} \log P_{\theta}(w_t \mid w_{<t}).
+\]
+\begin{itemize}
+    \item \textbf{Efficiency.}
+    Auto-regressive training can be parallelized over tokens within a sequence by shifting the inputs and targets (sometimes called the “teacher forcing” approach in RNNs). However, at inference time, tokens must be generated sequentially.
+    \item \textbf{Long-Range Context.}
+    Because each token attends to all previous tokens, the model can theoretically capture long-range dependencies. In practice, attention-based architectures allow for effective parallelization despite the left-to-right constraint.
+\end{itemize}
+
+
+\section{Next Sentence Prediction, Permutation LM, and Other Objectives}
+\label{sec:other_obj}
+% PROMPT: Compare objectives like next sentence prediction and permutation LM
+
+\subsection{How Objectives Influence Model’s Learned Representations}
+\noindent
+Beyond MLM and CLM, a variety of pretraining objectives have been explored to capture different facets of language:
+
+\begin{itemize}
+    \item \textbf{Next Sentence Prediction (NSP).}
+    Used in the original BERT, NSP asks the model to predict whether one segment of text logically follows another. This objective encourages the model to learn inter-sentence relationships, aiding tasks like question answering or reading comprehension. However, subsequent research has shown that NSP might not be as crucial as once thought; some models (e.g., RoBERTa) omit NSP altogether.
+
+    \item \textbf{Permutation Language Modeling (XLNet).}
+    XLNet generalizes auto-regressive modeling by permuting the factorization order of the tokens. This approach captures bidirectional context while retaining an auto-regressive training scheme, offering a blend of the benefits of MLM and CLM.
+
+    \item \textbf{Other Task-Specific Objectives.}
+    Further specialized objectives—like \emph{denoising autoencoders} in T5 (with random spans masked) or \emph{sentence-order prediction}—target particular downstream tasks or linguistic properties.
+
+\end{itemize}
+
+\noindent
+Each objective shapes what the model learns about language. Models that rely on \emph{masked} or \emph{bidirectional} contexts often excel at understanding text (e.g., classification, question answering), whereas \emph{causal} models are more adept at generative tasks (e.g., text completion, story generation). However, many LLMs today blend or fine-tune multiple objectives for maximum flexibility.
+
+\noindent
+In summary, \textbf{pretraining objectives} provide the foundation for large-scale language model training, guiding how models acquire semantic understanding, context representation, and generative capabilities. By choosing or combining these objectives carefully, practitioners can tailor LLMs to excel across a wide spectrum of NLP tasks. 

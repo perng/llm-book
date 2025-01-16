@@ -1,0 +1,71 @@
+\section{Multi-Head Attention}
+\label{sec:multi_head_attention}
+% PROMPT: Provide a small example demonstrating multi-head attention outputs
+
+\noindent
+\textbf{Multi-head attention} extends the concept of the single-head scaled dot-product attention by running multiple attention “heads” in parallel. Each head focuses on a different subspace of the embedding, allowing the model to capture richer relationships between tokens in a sequence. Below, we break down how embeddings are split and recombined, why multiple heads are beneficial, and the formal mathematical notation that underpins multi-head attention.
+
+\subsection{Splitting and Recombining Embeddings}
+Suppose each token in a sequence is represented by an embedding of dimension $d_\text{model}$. In a multi-head attention layer with $h$ heads, we split the embedding into $h$ smaller segments, each of dimension $d_k = d_\text{model} / h$. For each head:
+\begin{enumerate}
+    \item Compute its own \textbf{query} ($\mathbf{Q}$), \textbf{key} ($\mathbf{K}$), and \textbf{value} ($\mathbf{V}$) transformations, each of dimension $d_k$.
+    \item Perform scaled dot-product attention using these smaller matrices.
+    \item Obtain an attention output of dimension $d_k$.
+\end{enumerate}
+After all $h$ heads have computed their respective attention outputs, these outputs are concatenated and passed through a final linear projection back to dimension $d_\text{model}$. This process allows each head to learn a distinct way of attending to the tokens.
+
+\subsection{Benefits of Multiple Attention Heads}
+\noindent
+Running attention in parallel across multiple subspaces yields several advantages:
+\begin{itemize}
+    \item \textbf{Enhanced Representational Power.} Each head can specialize in capturing different types of dependencies (e.g., syntactic, semantic, or positional cues).
+    \item \textbf{Redundancy and Robustness.} With multiple heads, even if one head fails to learn useful representations, others might compensate.
+    \item \textbf{Better Gradient Flow.} Splitting the embedding space lowers the dimensionality of each attention computation, helping stabilize gradients and speeding up training.
+\end{itemize}
+
+\subsection{Mathematical Notation for Multi-Head Attention}
+\noindent
+Let $\mathbf{X} \in \mathbb{R}^{n \times d_\text{model}}$ be the matrix of input embeddings (one token per row). For each head $i \in \{1, \ldots, h\}$, define parameter matrices:
+\[
+\mathbf{W}_\mathbf{Q}^{(i)} \in \mathbb{R}^{d_\text{model} \times d_k}, \quad
+\mathbf{W}_\mathbf{K}^{(i)} \in \mathbb{R}^{d_\text{model} \times d_k}, \quad
+\mathbf{W}_\mathbf{V}^{(i)} \in \mathbb{R}^{d_\text{model} \times d_k}.
+\]
+The output of head $i$ is:
+\[
+\text{head}_i(\mathbf{X}) = \text{Attention}\!\Bigl(\mathbf{X}\mathbf{W}_\mathbf{Q}^{(i)},\, \mathbf{X}\mathbf{W}_\mathbf{K}^{(i)},\, \mathbf{X}\mathbf{W}_\mathbf{V}^{(i)}\Bigr).
+\]
+After computing all $h$ heads, we concatenate their outputs along the feature dimension:
+\[
+\text{Concat}(\text{head}_1, \ldots, \text{head}_h) \in \mathbb{R}^{n \times (h \cdot d_k)}.
+\]
+Finally, this concatenated vector is projected back to $d_\text{model}$ using a linear transformation $\mathbf{W}_O$:
+\[
+\text{MultiHead}(\mathbf{X}) 
+= \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\,\mathbf{W}_O.
+\]
+\noindent
+Here, $\mathbf{W}_O \in \mathbb{R}^{(h \cdot d_k) \times d_\text{model}}$ combines information from each attention head into the final output dimension. This design fosters multiple perspectives on the input sequence—often resulting in more nuanced and powerful contextual representations. As we will see, multi-head attention underlies not just the encoder and decoder blocks in a Transformer, but also cross-attention mechanisms that tie the two together. 
+
+% Parameter matrices dimensions
+\begin{equation}\label{eq:mha_params}
+\mathbf{W}_\mathbf{Q}^{(i)} \in \mathbb{R}^{d_\text{model} \times d_k}, \quad
+\mathbf{W}_\mathbf{K}^{(i)} \in \mathbb{R}^{d_\text{model} \times d_k}, \quad
+\mathbf{W}_\mathbf{V}^{(i)} \in \mathbb{R}^{d_\text{model} \times d_k}
+\end{equation}
+
+% Single head output
+\begin{equation}\label{eq:single_head}
+\text{head}_i(\mathbf{X}) = \text{Attention}\!\Bigl(\mathbf{X}\mathbf{W}_\mathbf{Q}^{(i)},\, \mathbf{X}\mathbf{W}_\mathbf{K}^{(i)},\, \mathbf{X}\mathbf{W}_\mathbf{V}^{(i)}\Bigr)
+\end{equation}
+
+% Concatenation
+\begin{equation}\label{eq:head_concat}
+\text{Concat}(\text{head}_1, \ldots, \text{head}_h) \in \mathbb{R}^{n \times (h \cdot d_k)}
+\end{equation}
+
+% Final multi-head output
+\begin{equation}\label{eq:multihead_final}
+\text{MultiHead}(\mathbf{X}) 
+= \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\,\mathbf{W}_O
+\end{equation} 

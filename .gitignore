@@ -18,3 +18,5 @@
 **/*.fls
 main-epub
 _minted
+**/*.listing
+llm-book.listing

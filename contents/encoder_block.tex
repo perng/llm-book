@@ -1,0 +1,173 @@
+\section{Encoder Block}
+\label{sec:encoder_block}
+% PROMPT: Expand on the role of layer normalization
+
+\noindent
+A Transformer \textbf{encoder block} is a modular building unit consisting of two main sub-layers: multi-head self-attention and a position-wise feedforward network. Each sub-layer is wrapped with additional operations (residual connections and layer normalization) to stabilize and improve training. This section focuses on two crucial components in this architecture: \textbf{layer normalization} and \textbf{residual connections}.
+
+\subsection{Layer Normalization and Its Role in Stable Training}
+\noindent
+\textbf{Layer normalization} (LayerNorm) is applied to the intermediate representations to stabilize the distribution of activations. Unlike batch normalization, which computes statistics across a batch dimension, layer normalization computes statistics \emph{across the feature dimension} for each training example:
+\[
+\text{LayerNorm}(\mathbf{x}) 
+= \frac{\mathbf{x} - \mu(\mathbf{x})}{\sigma(\mathbf{x})} \cdot \boldsymbol{\gamma} + \boldsymbol{\beta},
+\]
+where:
+\begin{itemize}
+    \item $\mu(\mathbf{x})$ is the mean of the features in $\mathbf{x}$,
+    \item $\sigma(\mathbf{x})$ is the standard deviation,
+    \item $\boldsymbol{\gamma}$ and $\boldsymbol{\beta}$ are learnable parameters that allow the network to rescale and shift the normalized output back to a suitable range.
+\end{itemize}
+
+\noindent
+\textbf{Key Benefits of LayerNorm for Transformers:}
+\begin{itemize}
+    \item \textbf{Stability During Training.} Normalizing each activation vector by its own mean and variance reduces the risk of exploding or vanishing gradients, facilitating more reliable training across large parameter spaces.
+    \item \textbf{Permutation Invariance.} Since layer normalization is applied to each token embedding \emph{individually}, it remains effective for variable batch sizes and sequence lengths.
+    \item \textbf{Reduced Internal Covariate Shift.} By standardizing activations, the model learns more robustly across layers, ensuring that updates in one part of the network do not excessively disrupt the distribution of inputs to another part.
+\end{itemize}
+
+\subsection{Residual Connections: Rationale and Benefits}
+\noindent
+Transformers rely heavily on \textbf{residual connections} (also known as skip connections) to simplify gradient flow and enable deeper architectures. In each sub-layer, we add a skip connection from the input of the sub-layer to its output:
+\[
+\mathbf{z} = \text{LayerNorm}(\mathbf{x} + \text{SubLayer}(\mathbf{x})),
+\]
+where $\mathbf{x}$ is the input to the sub-layer, and $\mathbf{z}$ is the final output of that sub-layer (after layer normalization).
+
+\begin{itemize}
+    \item \textbf{Improved Gradient Propagation.} The skip connection provides a path for gradients to flow from deeper layers back to earlier ones, mitigating the vanishing gradient problem and accelerating convergence.
+    \item \textbf{Better Convergence at Scale.} Residual connections help maintain stable activations when training very deep models or very large models—common in modern LLMs.
+    \item \textbf{Identity Function as a Baseline.} If the sub-layer fails to learn anything useful, the output can revert to the input via the identity mapping, preventing severe performance degradation.
+\end{itemize}
+
+\noindent
+In practice, each encoder block is composed of:
+\[
+\text{EncoderBlock}(\mathbf{x}) = 
+\text{LayerNorm}\Bigl(\mathbf{x} + \text{MultiHeadSelfAttn}(\mathbf{x})\Bigr) 
+\rightarrow 
+\text{LayerNorm}\Bigl(\mathbf{z} + \text{FFN}(\mathbf{z})\Bigr),
+\]
+where $\mathbf{z}$ is the intermediate output after the self-attention step. Repeated stacking of these encoder blocks enables hierarchical abstraction of the input sequence representations.
+
+
+\section{Decoder Block}
+\label{sec:decoder_block}
+% PROMPT: Clarify the difference between encoder self-attention and decoder self-attention
+
+\noindent
+The \textbf{decoder block} in a Transformer is similarly structured to the encoder block but includes additional mechanisms crucial for auto-regressive generation. Specifically, the decoder block features:
+\begin{enumerate}
+    \item \textbf{Masked Multi-Head Self-Attention}
+    \item \textbf{Encoder-Decoder Cross-Attention}
+    \item \textbf{Position-Wise Feedforward Network}
+\end{enumerate}
+Layer normalization and residual connections are also applied, just as in the encoder.
+
+\subsection{Masked Multi-Head Attention}
+\noindent
+In the decoder, the \emph{self-attention} sub-layer is \textbf{masked} to preserve causality in language generation tasks. This means each token can only attend to itself and the \emph{previous} tokens in the sequence. Formally,
+\[
+\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}, \mathbf{M}) 
+= \text{softmax}\Bigl(\frac{\mathbf{Q}\mathbf{K}^\top + \mathbf{M}}{\sqrt{d_k}}\Bigr)\mathbf{V},
+\]
+where $\mathbf{M}$ is a mask matrix that sets attention scores to $-\infty$ for positions representing future tokens.
+
+\subsection{Encoder-Decoder Cross-Attention}
+\noindent
+Unlike the encoder, the decoder also needs to incorporate the representations learned by the encoder. The \textbf{encoder-decoder cross-attention} sub-layer accomplishes this:
+\[
+\text{CrossAttention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) 
+= \text{softmax}\Bigl(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d_k}}\Bigr)\mathbf{V},
+\]
+where now
+\begin{itemize}
+    \item $\mathbf{Q}$ comes from the \emph{decoder} hidden states,
+    \item $\mathbf{K}, \mathbf{V}$ come from the final \emph{encoder} outputs.
+\end{itemize}
+This step allows the decoder to focus on relevant information from the entire source sequence during generation.
+
+\subsection{Combining Outputs for Language Generation}
+\noindent
+Following self-attention and cross-attention, the \textbf{position-wise feedforward network} (FFN) is applied. As with the encoder, each sub-layer is surrounded by residual connections and layer normalization. The output of the decoder block is then passed to the next decoder block or ultimately used to predict the next token in auto-regressive fashion.
+
+\[
+\text{DecoderBlock}(\mathbf{y}) = 
+\text{LayerNorm}\Bigl(\mathbf{y} + \text{MaskedSelfAttn}(\mathbf{y})\Bigr)
+\rightarrow
+\text{LayerNorm}\Bigl(\mathbf{z} + \text{CrossAttn}(\mathbf{z}, \mathbf{x}_{\text{enc}})\Bigr)
+\rightarrow
+\text{LayerNorm}\Bigl(\mathbf{w} + \text{FFN}(\mathbf{w})\Bigr),
+\]
+where $\mathbf{y}$ is the decoder input (shifted right tokens), $\mathbf{x}_{\text{enc}}$ represents the encoder outputs, and $\mathbf{z}$, $\mathbf{w}$ are intermediate states.
+
+\noindent
+This process is repeated for each token in the output sequence (e.g., each time step in auto-regressive generation). The distinction between \emph{encoder self-attention} (bidirectional, unmasked) and \emph{decoder self-attention} (unidirectional, masked) ensures that the model does not peek at future tokens—preserving the causal property necessary for language generation.
+
+
+\section{Mathematical Notation of the Transformer}
+\label{sec:transformer_notation}
+% PROMPT: Collect all the main formulas for easy reference
+
+\noindent
+The Transformer’s power lies in its ability to process sequences in a fully parallel manner while preserving context via self-attention. Below is a concise reference to the core formulas that define the encoder-decoder structure, highlighting \textbf{layer norms}, \textbf{attention mechanisms}, and the \textbf{feedforward} layers.
+
+\subsection{Attention Mechanisms}
+\begin{align}
+&\textbf{Scaled Dot-Product Attention:}\notag\\
+&\quad \text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) 
+= \text{softmax}\!\Bigl(\frac{\mathbf{Q} \mathbf{K}^\top}{\sqrt{d_k}}\Bigr) \mathbf{V}. \label{eq:attention} \\[6pt]
+&\textbf{Multi-Head Attention (MHA):}\notag\\
+&\quad
+\text{head}_i(\mathbf{X}) 
+= 
+\text{Attention}\Bigl(
+\mathbf{X}\mathbf{W}_\mathbf{Q}^{(i)},\ 
+\mathbf{X}\mathbf{W}_\mathbf{K}^{(i)},\ 
+\mathbf{X}\mathbf{W}_\mathbf{V}^{(i)}
+\Bigr), \label{eq:mha_head} \\
+&\quad 
+\text{MHA}(\mathbf{X}) 
+= 
+\text{Concat}(\text{head}_1, \ldots, \text{head}_h)\,\mathbf{W}_O. \label{eq:mha_final}
+\end{align}
+
+\subsection{Layer Normalization and Residual Connections}
+\begin{align*}
+&\mathbf{z} = \text{LayerNorm}\Bigl(\mathbf{x} + \text{SubLayer}(\mathbf{x})\Bigr), \\
+&\text{where} \quad
+\text{LayerNorm}(\mathbf{x}) 
+= 
+\frac{\mathbf{x} - \mu(\mathbf{x})}{\sigma(\mathbf{x})} \cdot \boldsymbol{\gamma} + \boldsymbol{\beta}.
+\end{align*}
+Here, $\mu(\mathbf{x})$ and $\sigma(\mathbf{x})$ denote the mean and standard deviation computed over the feature dimension of $\mathbf{x}$, respectively.
+
+\subsection{Feedforward Networks (FFN)}
+\begin{align*}
+&\text{FFN}(\mathbf{x}) = \max(0, \mathbf{x}\mathbf{W}_1 + \mathbf{b}_1)\,\mathbf{W}_2 + \mathbf{b}_2,
+\end{align*}
+often with ReLU or GELU activation in the middle layer. The parameters $\mathbf{W}_1, \mathbf{W}_2, \mathbf{b}_1, \mathbf{b}_2$ are shared across positions but differ from one layer to another.
+
+\subsection{Putting It All Together}
+\noindent
+An \textbf{encoder layer} comprises:
+\[
+\mathbf{z} = \text{LayerNorm}\Bigl(\mathbf{x} + \text{MHA}(\mathbf{x})\Bigr), \quad
+\mathbf{z}' = \text{LayerNorm}\Bigl(\mathbf{z} + \text{FFN}(\mathbf{z})\Bigr).
+\]
+Multiple encoder layers are stacked to form the entire encoder module.
+
+\noindent
+A \textbf{decoder layer} includes:
+\[
+\mathbf{y}' = \text{LayerNorm}\Bigl(\mathbf{y} + \text{MaskedMHA}(\mathbf{y})\Bigr),\quad
+\mathbf{y}'' = \text{LayerNorm}\Bigl(\mathbf{y}' + \text{CrossAttn}(\mathbf{y}', \mathbf{x}_{\text{enc}})\Bigr),
+\]
+\[
+\mathbf{y}''' = \text{LayerNorm}\Bigl(\mathbf{y}'' + \text{FFN}(\mathbf{y}'')\Bigr).
+\]
+The final decoder output is typically fed into a projection layer to produce logits over the vocabulary for next-token prediction.
+
+\noindent
+These formulas encapsulate the core mathematical framework of the Transformer. Subtle variations exist across different implementations (e.g., pre-layer normalization vs. post-layer normalization), but the core operations—\emph{multi-head attention, residual connections, feedforward networks, and normalization}—remain consistent. By internalizing these operations, one can more deeply understand how modern LLMs process large-scale textual data and generate coherent, context-aware responses.
