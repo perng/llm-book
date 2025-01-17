@@ -27,9 +27,8 @@ Commonly used for regression tasks, MSE measures the average squared difference 
 
 \[ MSE = \frac{1}{n}\sum_{i=1}^n (y_i - \hat{y}_i)^2 \]
 
-Figure \ref{fig:mse_implementation} shows a simple NumPy implementation of MSE loss.
+The following code demonstrates the implementation of Mean Squared Error loss function:
 
-\begin{figure}[h]
 \begin{pythoncode}[Mean Squared Error Implementation]
 import numpy as np
 
@@ -41,18 +40,16 @@ y_true = np.array([1.0, 2.0, 3.0])
 y_pred = np.array([1.1, 2.2, 2.8])
 loss = mse_loss(y_true, y_pred)  # Output: 0.05
 \end{pythoncode}
-\caption{Implementation of Mean Squared Error loss function}
-\label{fig:mse_implementation}
-\end{figure}
+
+
 
 \paragraph{Cross-Entropy Loss}
 Used primarily for classification tasks, cross-entropy loss measures the difference between predicted probability distributions and true labels:
 
 \[ H(y, \hat{y}) = -\sum_{i=1}^n y_i \log(\hat{y}_i) \]
 
-The implementation of cross-entropy loss with numerical stability considerations is shown in Figure \ref{fig:cross_entropy_implementation}.
+The implementation of cross-entropy loss with numerical stability considerations is shown in the following code:
 
-\begin{figure}[h]
 \begin{pythoncode}[Cross-Entropy Loss Implementation]
 def cross_entropy_loss(y_true, y_pred):
     # Add small epsilon to avoid log(0)
@@ -65,9 +62,6 @@ y_true = np.array([1, 0, 1])
 y_pred = np.array([0.9, 0.1, 0.8])
 loss = cross_entropy_loss(y_true, y_pred)
 \end{pythoncode}
-\caption{Implementation of Cross-Entropy loss function with numerical stability}
-\label{fig:cross_entropy_implementation}
-\end{figure}
 
 \subsubsection{Optimization Algorithms}
 The process of minimizing loss functions typically involves gradient descent and its variants.
@@ -77,9 +71,9 @@ Basic SGD updates parameters using the gradient of the loss with respect to each
 
 \[ \theta_{t+1} = \theta_t - \eta \nabla_\theta J(\theta) \]
 
-A basic implementation of SGD is shown in Figure \ref{fig:sgd_implementation}.
+A basic implementation of SGD is shown in the following code:
 
-\begin{figure}[h]
+
 \begin{pythoncode}[Stochastic Gradient Descent Implementation]
 def sgd_update(params, grads, learning_rate=0.01):
     return params - learning_rate * grads
@@ -89,14 +83,10 @@ weights = np.array([0.5, -0.2, 0.1])
 gradients = np.array([0.1, -0.05, 0.02])
 weights = sgd_update(weights, gradients)
 \end{pythoncode}
-\caption{Implementation of basic Stochastic Gradient Descent}
-\label{fig:sgd_implementation}
-\end{figure}
 
 \paragraph{SGD with Momentum}
-Momentum helps accelerate SGD by accumulating a velocity vector in directions of persistent reduction in the objective. Figure \ref{fig:momentum_implementation} demonstrates the implementation of SGD with momentum.
+Momentum helps accelerate SGD by accumulating a velocity vector in directions of persistent reduction in the objective. The following code demonstrates the implementation of SGD with momentum.
 
-\begin{figure}[h]
 \begin{pythoncode}[SGD with Momentum Implementation]
 def sgd_momentum_update(params, velocity, grads, 
                        learning_rate=0.01, momentum=0.9):
@@ -109,14 +99,10 @@ velocity = np.zeros_like(weights)
 gradients = np.array([0.1, -0.05, 0.02])
 weights, velocity = sgd_momentum_update(weights, velocity, gradients)
 \end{pythoncode}
-\caption{Implementation of SGD with Momentum}
-\label{fig:momentum_implementation}
-\end{figure}
 
 \paragraph{Adam Optimizer}
-Adam combines ideas from momentum and RMSprop, maintaining per-parameter learning rates. The implementation with bias correction is shown in Figure \ref{fig:adam_implementation}.
+Adam combines ideas from momentum and RMSprop, maintaining per-parameter learning rates. The implementation with bias correction is shown in the following code:
 
-\begin{figure}[h]
 \begin{pythoncode}[Adam Optimizer Implementation]
 def adam_update(params, m, v, grads, t, 
                 learning_rate=0.001, beta1=0.9, beta2=0.999):
@@ -143,9 +129,6 @@ gradients = np.array([0.1, -0.05, 0.02])
 t = 1  # timestep
 weights, m, v = adam_update(weights, m, v, gradients, t)
 \end{pythoncode}
-\caption{Implementation of Adam optimizer with bias correction}
-\label{fig:adam_implementation}
-\end{figure}
 
 \subsection{Practical Considerations}
 

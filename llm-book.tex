@@ -16,7 +16,7 @@
 \setlist{noitemsep}
 
 \usepackage{tcolorbox}
-\tcbuselibrary{listings,minted,skins}
+\tcbuselibrary{listings,minted,skins,breakable}
 
 \newtcblisting{pythoncode}[1][Python Implementation]{
   listing engine=minted,
@@ -25,6 +25,7 @@
   listing only,
   minted language=python,
   minted options={fontsize=\small,breaklines,autogobble,linenos,numbersep=3mm},
+  breakable,
   left=5mm,
   enhanced,
   title=#1,

@@ -2,7 +2,8 @@
 \label{sec:neural_networks_101}
 % PROMPT: Showcase a minimal neural network from scratch
 
-\begin{figure}[h]
+\subsection{Perceptrons and Multi-Layer Perceptrons (MLPs)}
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     neuron/.style={circle, draw=blue!80, fill=blue!20, minimum size=20pt},
@@ -72,7 +73,7 @@ Neural networks have revolutionized modern machine learning by learning \emph{no
 
 \subsection{Perceptrons and Multi-Layer Perceptrons (MLPs)}
 \noindent
-The \textbf{perceptron}, introduced by Frank Rosenblatt in the late 1950s, is one of the earliest forms of a trainable neural network. It models a single neuron with:
+The \textbf{perceptron} (Figure~\ref{fig:neural_architectures}), introduced by Frank Rosenblatt in the late 1950s, is one of the earliest forms of a trainable neural network. It models a single neuron with:
 \begin{enumerate}
     \item A set of input weights.
     \item A linear combination of inputs and weights.
@@ -90,21 +91,152 @@ While a single perceptron can only represent linear decision boundaries, stackin
 \noindent
 Learning in neural networks typically involves two main steps:
 \begin{itemize}
-    \item \textbf{Forward Propagation.} The input $\mathbf{x}$ is propagated through each layer of the network to compute an output $\hat{\mathbf{y}}$. Mathematically, for layer $l$ with weights $\mathbf{W}^{(l)}$ and bias $\mathbf{b}^{(l)}$,
+    \item \textbf{Forward Propagation.} The process of moving data through the network from input to output:
+    
+    \begin{itemize}
+        \item \textbf{Input Layer Processing:}
+            \begin{itemize}
+                \item Raw input features enter the network
+                \item Each feature is weighted according to learned parameters
+                \item The weighted inputs are combined and passed through an activation function
+            \end{itemize}
+            
+        \item \textbf{Hidden Layer Transformations:}
+            \begin{itemize}
+                \item Each hidden layer receives processed information from the previous layer
+                \item The network learns increasingly complex representations at each layer
+                \item Non-linear activation functions allow the network to model complex patterns
+                \item Each neuron acts as a feature detector, learning to recognize specific patterns
+            \end{itemize}
+            
+        \item \textbf{Output Layer Generation:}
+            \begin{itemize}
+                \item The final layer produces predictions based on all previous transformations
+                \item Output format depends on the task (e.g., probabilities for classification)
+                \item The network's prediction is compared to the true target to compute error
+            \end{itemize}
+            
+        \item \textbf{Key Concepts:}
+            \begin{itemize}
+                \item Information flows in one direction: input → hidden layers → output
+                \item Each connection has a weight that's learned during training
+                \item Bias terms allow the network to shift activation functions
+                \item The network builds a hierarchical representation of the input data
+            \end{itemize}
+    \end{itemize}
+    
     \begin{equation}\label{eq:forward_prop}
         \mathbf{z}^{(l)} = \mathbf{W}^{(l)} \mathbf{h}^{(l-1)} + \mathbf{b}^{(l)}, \quad \mathbf{h}^{(l)} = \sigma(\mathbf{z}^{(l)})
     \end{equation}
     where $\sigma(\cdot)$ is a non-linear activation function, and $\mathbf{h}^{(0)} \equiv \mathbf{x}$ is the input vector.
 
-    \item \textbf{Backward Propagation (Backprop).} Once a loss function $\mathcal{L}(\hat{\mathbf{y}}, \mathbf{y})$ is computed—where $\mathbf{y}$ is the ground-truth label—the gradient of $\mathcal{L}$ w.r.t. each parameter in the network is calculated using the chain rule. Parameters are updated via an optimization algorithm (e.g., \textit{Stochastic Gradient Descent}, \textit{Adam}), moving them in the direction that reduces the loss.
+    \item \textbf{Backward Propagation (Backprop).} The backbone of neural network training, backpropagation is the key mechanism that enables neural networks to learn from their mistakes. Its primary purposes are:
+
+    \begin{itemize}
+        \item \textbf{Error Attribution:}
+            \begin{itemize}
+                \item Determines how much each neuron contributed to the network's error
+                \item Traces the path of mistakes backwards through the network
+                \item Identifies which weights need the most adjustment
+                \item Helps understand which parts of the network are most responsible for incorrect predictions
+            \end{itemize}
+            
+        \item \textbf{Learning Process:}
+            \begin{itemize}
+                \item Adjusts weights to minimize prediction errors
+                \item Stronger corrections for neurons that contributed more to mistakes
+                \item Weaker corrections for neurons that had less impact
+                \item Balances the influence of different network components
+            \end{itemize}
+            
+        \item \textbf{Optimization Benefits:}
+            \begin{itemize}
+                \item Efficiently updates millions of parameters simultaneously
+                \item Prevents the need for trial-and-error weight adjustment
+                \item Enables deep networks to learn complex patterns
+                \item Provides a systematic way to improve network performance
+            \end{itemize}
+            
+        \item \textbf{Training Insights:}
+            \begin{itemize}
+                \item Helps identify learning problems (e.g., vanishing gradients)
+                \item Guides the choice of learning rates and optimization strategies
+                \item Indicates which parts of the network are learning effectively
+                \item Assists in debugging network architectures
+            \end{itemize}
+    \end{itemize}
+
+    \begin{itemize}
+        \item \textbf{Chain Rule Application:} For a composite function $f(g(x))$, the chain rule states:
+        \begin{equation}
+            \frac{\partial f(g(x))}{\partial x} = \frac{\partial f}{\partial g} \cdot \frac{\partial g}{\partial x}
+        \end{equation}
+        
+        \item \textbf{Gradient Flow:} Starting from the output layer and moving backward:
+        \begin{enumerate}
+            \item Compute loss gradient: $\frac{\partial \mathcal{L}}{\partial \hat{\mathbf{y}}}$
+            \item For each layer $l$, compute:
+                \begin{align}
+                    \frac{\partial \mathcal{L}}{\partial \mathbf{z}^{(l)}} &= \frac{\partial \mathcal{L}}{\partial \mathbf{h}^{(l)}} \cdot \frac{\partial \mathbf{h}^{(l)}}{\partial \mathbf{z}^{(l)}} \\
+                    \frac{\partial \mathcal{L}}{\partial \mathbf{W}^{(l)}} &= \frac{\partial \mathcal{L}}{\partial \mathbf{z}^{(l)}} \cdot \frac{\partial \mathbf{z}^{(l)}}{\partial \mathbf{W}^{(l)}}
+                \end{align}
+        \end{enumerate}
+        
+        \item \textbf{Parameter Updates:} Using computed gradients, parameters are updated:
+        \begin{equation}
+            \mathbf{W}^{(l)} \leftarrow \mathbf{W}^{(l)} - \alpha \frac{\partial \mathcal{L}}{\partial \mathbf{W}^{(l)}}
+        \end{equation}
+        where $\alpha$ is the learning rate.
+    \end{itemize}
+
+    Modern deep learning frameworks like PyTorch and TensorFlow implement automatic differentiation, computing these gradients efficiently without manual derivation. However, understanding the underlying mathematics remains crucial for:
+    \begin{itemize}
+        \item Debugging training issues
+        \item Implementing custom layers
+        \item Optimizing network architectures
+        \item Choosing appropriate learning rates and optimization strategies
+    \end{itemize}
+
+
+    The learning rate $\alpha$ is a crucial hyperparameter that controls how large steps we take during training. A large learning rate means taking bigger steps, potentially learning faster but risking overshooting the optimal solution. A small learning rate takes smaller, more careful steps, leading to more stable training but requiring more time to converge. Finding the right learning rate is often a balancing act: too large and the training might diverge, too small and the training might be impractically slow or get stuck in local minima.
+\end{itemize}
+
+
+This loop of forward and backward propagation, repeated over multiple \emph{epochs} of training data, enables a neural network to \emph{learn} complex transformations—an essential capability for tasks like language modeling.
+
+\noindent
+An epoch represents one complete pass through the entire training dataset. During each epoch:
+\begin{itemize}
+    \item Every training example is used once for forward propagation
+    \item The network's predictions are compared with true values
+    \item Weights are updated through backpropagation
+    \item The process is repeated for multiple epochs until the network converges
 \end{itemize}
 
 \noindent
-This loop of forward and backward propagation, repeated over multiple \emph{epochs} of training data, enables a neural network to \emph{learn} complex transformations—an essential capability for tasks like language modeling.
+Training typically requires multiple epochs because:
+\begin{itemize}
+    \item The network needs repeated exposure to learn complex patterns
+    \item Initial weight updates may be suboptimal
+    \item Different aspects of the data may be learned in different epochs
+    \item The learning process is iterative and gradual
+\end{itemize}
 
 \subsection{Activation Functions}
 \noindent
-Activation functions impart non-linearity, allowing neural networks to model non-trivial functions.  See Figure \ref{fig:activation_functions} for a comparison of common activation functions.
+Activation functions impart non-linearity, allowing neural networks to model non-trivial functions. Without activation functions, neural networks would be limited to linear transformations, regardless of their depth. Here's why they're essential:
+
+\begin{itemize}
+    \item \textbf{Non-linearity:} Real-world problems rarely follow linear patterns. Activation functions enable networks to learn and represent complex, non-linear relationships in data.
+    
+    \item \textbf{Feature Transformation:} Each neuron can learn to activate for different input patterns, effectively becoming specialized feature detectors.
+    
+    \item \textbf{Gradient Flow:} Different activation functions affect how gradients flow through the network during training, influencing learning dynamics.
+    
+    \item \textbf{Output Range:} Activation functions can bound outputs to specific ranges (e.g., [0,1] for sigmoid, [-1,1] for tanh), which is useful for tasks like probability prediction.
+\end{itemize}
+
+See Figure \ref{fig:activation_functions} for a comparison of common activation functions.
 
 \begin{figure}[h]
 \centering
@@ -126,19 +258,19 @@ Activation functions impart non-linearity, allowing neural networks to model non
 \end{scope}
 
 % Grid and axes for Sigmoid
-\begin{scope}[xshift=0cm]
-    \draw[->] (-2,0) -- (2,0) node[right] {$x$};
+\begin{scope}[xshift=0cm, xscale=0.66]
+    \draw[->] (-3,0) -- (3,0) node[right] {$x$};
     \draw[->] (0,-0.5) -- (0,2) node[above] {$y$};
-    \draw[thick, red, domain=-2:2, samples=100] 
+    \draw[thick, red, domain=-3:3, samples=100] 
         plot (\x,{sigmoid(\x)});
     \node[align=center] at (0,-1.5) {(b) Sigmoid\\$\frac{1}{1+e^{-x}}$};
 \end{scope}
 
 % Grid and axes for Tanh
-\begin{scope}[xshift=5cm]
-    \draw[->] (-2,0) -- (2,0) node[right] {$x$};
+\begin{scope}[xshift=5cm, xscale=0.66]
+    \draw[->] (-3,0) -- (3,0) node[right] {$x$};
     \draw[->] (0,-0.5) -- (0,2) node[above] {$y$};
-    \draw[thick, green!60!black, domain=-2:2, samples=100] 
+    \draw[thick, green!60!black, domain=-3:3, samples=100] 
         plot (\x,{tanhy(\x)});
     \node[align=center] at (0,-1.5) {(c) Tanh\\$\tanh(x)$};
 \end{scope}
@@ -170,49 +302,87 @@ Activation functions impart non-linearity, allowing neural networks to model non
 
 \subsection{Minimal Neural Network Example}
 \noindent
-Figure \ref{fig:minimal_neural_network_example} is a minimal example in pseudocode (or a Python-like syntax) of a single hidden-layer neural network for a binary classification task:
+The following code is a minimal example in Python of a single hidden-layer neural network for a binary classification task:
 
-\begin{figure}[h]
 \begin{pythoncode}[Minimal Neural Network Example]
-import numpy as np
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader
-
-# Define network architecture
-input_size = D
-hidden_size = H
-output_size = 1  # for binary classification
-
-# Initialize parameters
-W1 = np.random.normal(0, 0.01, (D, H))  # or torch.randn for PyTorch
-b1 = np.zeros(H)
-W2 = np.random.normal(0, 0.01, (H, output_size))
-b2 = np.zeros(output_size)
-
-# Forward pass function
-def forward(x):
-    z1 = x @ W1 + b1
-    h1 = np.maximum(0, z1)  # relu
-    z2 = h1 @ W2 + b2
-    return 1 / (1 + np.exp(-z2))  # sigmoid
-
-# Training loop (simplified)
-for epoch in range(num_epochs):
-    for x_batch, y_batch in data_loader:
-        # Forward pass
-        y_pred = forward(x_batch)
-        # Compute loss (e.g., binary cross-entropy)
-        loss = -np.mean(y_batch * np.log(y_pred) + (1 - y_batch) * np.log(1 - y_pred))
+    import numpy as np
+    import torch
+    import torch.nn as nn
+    from torch.utils.data import DataLoader
+    
+    # Part 1: Network Architecture and Initialization
+    # ---------------------------------------------
+    input_size = D
+    hidden_size = H
+    output_size = 1  # for binary classification
+    
+    # Initialize parameters
+    W1 = np.random.normal(0, 0.01, (D, H))  # or torch.randn for PyTorch
+    b1 = np.zeros(H)
+    W2 = np.random.normal(0, 0.01, (H, output_size))
+    b2 = np.zeros(output_size)
+    
+    
+    # Part 2: Forward Pass Implementation
+    # ---------------------------------
+    def forward(x):
+        # First layer
+        z1 = x @ W1 + b1
+        h1 = np.maximum(0, z1)  # ReLU activation
         
-        # Backprop (automatic differentiation or manually computed)
-        # grads = compute_gradients(loss, [W1, b1, W2, b2])
+        # Output layer
+        z2 = h1 @ W2 + b2
+        y_pred = 1 / (1 + np.exp(-z2))  # sigmoid activation
         
-        # Parameter update
-        # update_parameters([W1, b1, W2, b2], grads, learning_rate)
-\end{pythoncode}
-\label{fig:minimal_neural_network_example}
-\end{figure}
+        return y_pred, (z1, h1, z2)  # Return activations for backprop
+    
+    
+    # Part 3: Backpropagation Implementation
+    # ------------------------------------
+    def compute_gradients(loss, y_pred, cache, x, y_true):
+        z1, h1, z2 = cache
+        
+        # Gradient of loss with respect to output
+        dy_pred = (y_pred - y_true) / len(y_true)
+        
+        # Gradients for output layer
+        dz2 = dy_pred * y_pred * (1 - y_pred)  # sigmoid derivative
+        dW2 = h1.T @ dz2
+        db2 = np.sum(dz2, axis=0)
+        
+        # Gradients for hidden layer
+        dh1 = dz2 @ W2.T
+        dz1 = dh1 * (z1 > 0)  # ReLU derivative
+        dW1 = x.T @ dz1
+        db1 = np.sum(dz1, axis=0)
+        
+        return {'W1': dW1, 'b1': db1, 'W2': dW2, 'b2': db2}
+    
+    
+    # Part 4: Training Loop
+    # -------------------
+    learning_rate = 0.01
+    
+    for epoch in range(num_epochs):
+        for x_batch, y_batch in data_loader:
+            # Forward pass
+            y_pred, cache = forward(x_batch)
+            
+            # Compute binary cross-entropy loss
+            loss = -np.mean(
+                y_batch * np.log(y_pred) + 
+                (1 - y_batch) * np.log(1 - y_pred)
+            )
+            
+            # Compute gradients
+            grads = compute_gradients(loss, y_pred, cache, x_batch, y_batch)
+            
+            # Update parameters
+            W1 -= learning_rate * grads['W1']
+            b1 -= learning_rate * grads['b1']
+            W2 -= learning_rate * grads['W2']
+            b2 -= learning_rate * grads['b2']
+    \end{pythoncode}
 
 \noindent
 While this example is basic, the core ideas of forward propagation, loss computation, and backpropagation remain the same in more advanced architectures used in modern NLP tasks.
@@ -228,3 +398,4 @@ Despite their remarkable flexibility, neural networks are not without pitfalls. 
 
 \noindent
 Understanding these fundamental concepts is crucial before diving into more specialized architectures, such as Transformers. By grounding ourselves in the mechanics of standard neural networks, we lay the foundation for comprehending how modern LLMs leverage and extend these principles to handle vast amounts of textual data at massive scales.
+
