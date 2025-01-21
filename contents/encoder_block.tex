@@ -3,15 +3,19 @@
 % PROMPT: Expand on the role of layer normalization
 
 \noindent
+The Transformer encoder consists of alternating layers of multi-head self-attention and position-wise feedforward networks...
+
+\noindent
 A Transformer \textbf{encoder block} is a modular building unit consisting of two main sub-layers: multi-head self-attention and a position-wise feedforward network. Each sub-layer is wrapped with additional operations (residual connections and layer normalization) to stabilize and improve training. This section focuses on two crucial components in this architecture: \textbf{layer normalization} and \textbf{residual connections}.
 
 \subsection{Layer Normalization and Its Role in Stable Training}
 \noindent
 \textbf{Layer normalization} (LayerNorm) is applied to the intermediate representations to stabilize the distribution of activations. Unlike batch normalization, which computes statistics across a batch dimension, layer normalization computes statistics \emph{across the feature dimension} for each training example:
-\[
-\text{LayerNorm}(\mathbf{x}) 
-= \frac{\mathbf{x} - \mu(\mathbf{x})}{\sigma(\mathbf{x})} \cdot \boldsymbol{\gamma} + \boldsymbol{\beta},
-\]
+\begin{equation}
+\begin{aligned}
+\text{LayerNorm}(\mathbf{x}) &= \frac{\mathbf{x} - \mu(\mathbf{x})}{\sigma(\mathbf{x})} \cdot \boldsymbol{\gamma} + \boldsymbol{\beta},
+\end{aligned}
+\end{equation}
 where:
 \begin{itemize}
     \item $\mu(\mathbf{x})$ is the mean of the features in $\mathbf{x}$,
@@ -30,9 +34,11 @@ where:
 \subsection{Residual Connections: Rationale and Benefits}
 \noindent
 Transformers rely heavily on \textbf{residual connections} (also known as skip connections) to simplify gradient flow and enable deeper architectures. In each sub-layer, we add a skip connection from the input of the sub-layer to its output:
-\[
-\mathbf{z} = \text{LayerNorm}(\mathbf{x} + \text{SubLayer}(\mathbf{x})),
-\]
+\begin{equation}
+\begin{aligned}
+\mathbf{z} &= \text{LayerNorm}\Bigl(\mathbf{x} + \text{SubLayer}(\mathbf{x})\Bigr),
+\end{aligned}
+\end{equation}
 where $\mathbf{x}$ is the input to the sub-layer, and $\mathbf{z}$ is the final output of that sub-layer (after layer normalization).
 
 \begin{itemize}
@@ -43,12 +49,12 @@ where $\mathbf{x}$ is the input to the sub-layer, and $\mathbf{z}$ is the final 
 
 \noindent
 In practice, each encoder block is composed of:
-\[
-\text{EncoderBlock}(\mathbf{x}) = 
-\text{LayerNorm}\Bigl(\mathbf{x} + \text{MultiHeadSelfAttn}(\mathbf{x})\Bigr) 
-\rightarrow 
-\text{LayerNorm}\Bigl(\mathbf{z} + \text{FFN}(\mathbf{z})\Bigr),
-\]
+\begin{equation}\label{eq:encoder_block}
+\begin{aligned}
+\text{EncoderBlock}(\mathbf{x}) &= \text{LayerNorm}\Bigl(\mathbf{x} + \text{MultiHeadSelfAttn}(\mathbf{x})\Bigr) \\
+&\rightarrow \text{LayerNorm}\Bigl(\mathbf{z} + \text{FFN}(\mathbf{z})\Bigr)
+\end{aligned}
+\end{equation}
 where $\mathbf{z}$ is the intermediate output after the self-attention step. Repeated stacking of these encoder blocks enables hierarchical abstraction of the input sequence representations.
 
 
@@ -57,7 +63,7 @@ where $\mathbf{z}$ is the intermediate output after the self-attention step. Rep
 % PROMPT: Clarify the difference between encoder self-attention and decoder self-attention
 
 \noindent
-The \textbf{decoder block} in a Transformer is similarly structured to the encoder block but includes additional mechanisms crucial for auto-regressive generation. Specifically, the decoder block features:
+The \textbf{decoder block} in a Transformer is similarly structured to the encoder block but includes additional mechanisms crucial for auto-regressive generation. Specifically, the decoder block features~\cite{liu2019roberta}:
 \begin{enumerate}
     \item \textbf{Masked Multi-Head Self-Attention}
     \item \textbf{Encoder-Decoder Cross-Attention}
@@ -92,14 +98,14 @@ This step allows the decoder to focus on relevant information from the entire so
 \noindent
 Following self-attention and cross-attention, the \textbf{position-wise feedforward network} (FFN) is applied. As with the encoder, each sub-layer is surrounded by residual connections and layer normalization. The output of the decoder block is then passed to the next decoder block or ultimately used to predict the next token in auto-regressive fashion.
 
-\[
+\begin{equation}\label{eq:decoder_block}
 \text{DecoderBlock}(\mathbf{y}) = 
 \text{LayerNorm}\Bigl(\mathbf{y} + \text{MaskedSelfAttn}(\mathbf{y})\Bigr)
 \rightarrow
 \text{LayerNorm}\Bigl(\mathbf{z} + \text{CrossAttn}(\mathbf{z}, \mathbf{x}_{\text{enc}})\Bigr)
 \rightarrow
-\text{LayerNorm}\Bigl(\mathbf{w} + \text{FFN}(\mathbf{w})\Bigr),
-\]
+\text{LayerNorm}\Bigl(\mathbf{w} + \text{FFN}(\mathbf{w})\Bigr)
+\end{equation}
 where $\mathbf{y}$ is the decoder input (shifted right tokens), $\mathbf{x}_{\text{enc}}$ represents the encoder outputs, and $\mathbf{z}$, $\mathbf{w}$ are intermediate states.
 
 \noindent
@@ -111,7 +117,7 @@ This process is repeated for each token in the output sequence (e.g., each time 
 % PROMPT: Collect all the main formulas for easy reference
 
 \noindent
-The Transformer’s power lies in its ability to process sequences in a fully parallel manner while preserving context via self-attention. Below is a concise reference to the core formulas that define the encoder-decoder structure, highlighting \textbf{layer norms}, \textbf{attention mechanisms}, and the \textbf{feedforward} layers.
+The Transformer's power lies in its ability to process sequences in a fully parallel manner while preserving context via self-attention. Below is a concise reference to the core formulas that define the encoder-decoder structure, highlighting \textbf{layer norms}, \textbf{attention mechanisms}, and the \textbf{feedforward} layers.
 
 \subsection{Attention Mechanisms}
 \begin{align}

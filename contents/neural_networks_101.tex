@@ -1,8 +1,8 @@
-\section{Neural Networks 101}
+\section{Neural Networks 101}\index{neural networks}\index{neural networks!basics}
 \label{sec:neural_networks_101}
 % PROMPT: Showcase a minimal neural network from scratch
 
-\subsection{Perceptrons and Multi-Layer Perceptrons (MLPs)}
+\subsection{Perceptrons and Multi-Layer Perceptrons (MLPs)}\index{perceptron}\index{MLP|see {Multi-Layer Perceptron}}\index{Multi-Layer Perceptron}
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
@@ -62,14 +62,14 @@
 \end{scope}
 
 \end{tikzpicture}
-\caption{Neural Network Architectures: (a) Single perceptron computing $y = \sigma(\sum_{i} w_i x_i + b)$, where $\sigma$ is an activation function. 
-(b) Multi-layer perceptron computing hidden layer $h_j = \sigma(\sum_{i} w^{(1)}_{ij} x_i + b^{(1)}_j)$ followed by outputs 
-$y_k = \sigma(\sum_{j} w^{(2)}_{jk} h_j + b^{(2)}_k)$. This architecture enables learning complex non-linear mappings through multiple layers of transformation.}
+\caption{Neural Network Architectures\index{neural architectures}: (a) Single perceptron\index{perceptron!single} computing $y = \sigma(\sum_{i} w_i x_i + b)$\index{activation function}, where $\sigma$ is an activation function. 
+(b) Multi-layer perceptron\index{perceptron!multi-layer} computing hidden layer\index{hidden layer} $h_j = \sigma(\sum_{i} w^{(1)}_{ij} x_i + b^{(1)}_j)$ followed by outputs\index{output layer} 
+$y_k = \sigma(\sum_{j} w^{(2)}_{jk} h_j + b^{(2)}_k)$. This architecture enables learning complex non-linear mappings\index{non-linear mappings} through multiple layers of transformation\index{transformation layers}.}
 \label{fig:neural_architectures}
 \end{figure}
 
 \noindent
-Neural networks have revolutionized modern machine learning by learning \emph{non-linear} mappings from input features to output predictions without the need for manually engineered features. In the context of language modeling, neural networks are particularly powerful because they can encode and combine linguistic features in high-dimensional spaces, capturing nuances that simpler statistical models may overlook.
+Neural networks\index{neural networks!definition} have revolutionized modern machine learning\index{machine learning} by learning \emph{non-linear}\index{non-linear} mappings from input features\index{input features} to output predictions\index{output predictions} without the need for manually engineered features\index{feature engineering}. In the context of language modeling\index{language modeling}, neural networks are particularly powerful because they can encode and combine linguistic features\index{linguistic features} in high-dimensional spaces\index{high-dimensional spaces}, capturing nuances that simpler statistical models\index{statistical models} may overlook.
 
 \subsection{Perceptrons and Multi-Layer Perceptrons (MLPs)}
 \noindent
@@ -87,7 +87,7 @@ While a single perceptron can only represent linear decision boundaries, stackin
     \item \textbf{Output Layer.} Produces the final prediction, such as a probability distribution over the next token for language modeling.
 \end{itemize}
 
-\subsection{Forward and Backpropagation}
+\subsection{Forward and Backpropagation}\index{forward propagation}\index{backpropagation}
 \noindent
 Learning in neural networks typically involves two main steps:
 \begin{itemize}
@@ -128,10 +128,9 @@ Learning in neural networks typically involves two main steps:
     \begin{equation}\label{eq:forward_prop}
         \mathbf{z}^{(l)} = \mathbf{W}^{(l)} \mathbf{h}^{(l-1)} + \mathbf{b}^{(l)}, \quad \mathbf{h}^{(l)} = \sigma(\mathbf{z}^{(l)})
     \end{equation}
-    where $\sigma(\cdot)$ is a non-linear activation function, and $\mathbf{h}^{(0)} \equiv \mathbf{x}$ is the input vector.
+    where $\sigma(\cdot)$ is a non-linear activation function\index{activation function}, and $\mathbf{h}^{(0)} \equiv \mathbf{x}$ is the input vector\index{input vector}.
 
-    \item \textbf{Backward Propagation (Backprop).} The backbone of neural network training, backpropagation is the key mechanism that enables neural networks to learn from their mistakes. Its primary purposes are:
-
+    \item \textbf{Backward Propagation (Backprop).}\index{backpropagation!definition} The backbone of neural network training\index{training}, backpropagation enables neural networks to learn from their mistakes through:
     \begin{itemize}
         \item \textbf{Error Attribution:}
             \begin{itemize}
@@ -172,9 +171,9 @@ Learning in neural networks typically involves two main steps:
             \frac{\partial f(g(x))}{\partial x} = \frac{\partial f}{\partial g} \cdot \frac{\partial g}{\partial x}
         \end{equation}
         
-        \item \textbf{Gradient Flow:} Starting from the output layer and moving backward:
+        \item \textbf{Gradient Flow:}\index{gradient flow} Starting from the output layer\index{output layer} and moving backward:
         \begin{enumerate}
-            \item Compute loss gradient: $\frac{\partial \mathcal{L}}{\partial \hat{\mathbf{y}}}$
+            \item Compute loss gradient\index{loss gradient}: $\frac{\partial \mathcal{L}}{\partial \hat{\mathbf{y}}}$
             \item For each layer $l$, compute:
                 \begin{align}
                     \frac{\partial \mathcal{L}}{\partial \mathbf{z}^{(l)}} &= \frac{\partial \mathcal{L}}{\partial \mathbf{h}^{(l)}} \cdot \frac{\partial \mathbf{h}^{(l)}}{\partial \mathbf{z}^{(l)}} \\
@@ -287,13 +286,13 @@ See Figure \ref{fig:activation_functions} for a comparison of common activation 
     \end{equation}
     Efficient and popular, though it can cause `dying ReLU' issues.
     
-    \item \textbf{Sigmoid:} 
+    \item \textbf{Sigmoid:}\index{sigmoid}\index{activation functions!sigmoid} 
     \begin{equation}\label{eq:sigmoid}
         \sigma(z) = \frac{1}{1+e^{-z}}
     \end{equation}
     Outputs values in $(0,1)$, but can saturate for large $|z|$.
     
-    \item \textbf{Tanh:} 
+    \item \textbf{Tanh:}\index{tanh}\index{activation functions!tanh} 
     \begin{equation}\label{eq:tanh}
         \sigma(z) = \tanh(z) = \frac{e^z - e^{-z}}{e^z + e^{-z}}
     \end{equation}
@@ -398,4 +397,113 @@ Despite their remarkable flexibility, neural networks are not without pitfalls. 
 
 \noindent
 Understanding these fundamental concepts is crucial before diving into more specialized architectures, such as Transformers. By grounding ourselves in the mechanics of standard neural networks, we lay the foundation for comprehending how modern LLMs leverage and extend these principles to handle vast amounts of textual data at massive scales.
+
+\section{Overfitting and Regularization}\index{overfitting}\index{regularization}
+\label{sec:overfitting_regularization}
+
+\noindent
+In the context of Large Language Models\index{LLM!overfitting}, overfitting occurs when a model performs well on training data\index{training data} but fails to generalize\index{generalization} to unseen examples. This section explores common regularization techniques\index{regularization techniques} used to combat overfitting in neural networks\index{neural networks!regularization}, with particular attention to their application in transformer-based architectures\index{transformer!regularization}.
+
+\subsection{Understanding Overfitting}\index{overfitting!understanding}
+\noindent
+Overfitting manifests when a model learns to:
+\begin{itemize}
+    \item Memorize training examples\index{memorization} rather than learning generalizable patterns\index{patterns!generalizable}
+    \item Capture noise\index{noise} in the training data rather than underlying relationships\index{relationships!underlying}
+    \item Perform significantly better on training data than validation data\index{validation data}, showing a large generalization gap\index{generalization gap}
+\end{itemize}
+
+\subsection{Common Regularization Techniques}\index{regularization!techniques}
+
+\subsubsection{Dropout}\index{dropout}
+\noindent
+Dropout\index{dropout!mechanism} randomly deactivates neurons during training with probability $p$, forcing the network to learn redundant representations\index{redundant representations}:
+
+\begin{equation}
+\mathbf{h}_\text{dropout} = \mathbf{m} \odot \mathbf{h}, \quad \mathbf{m}_i \sim \text{Bernoulli}(p)
+\end{equation}
+
+where $\odot$ represents element-wise multiplication\index{element-wise multiplication}, and $\mathbf{m}$ is the dropout mask\index{dropout!mask}.
+
+Key benefits include:
+\begin{itemize}
+    \item Prevents co-adaptation\index{co-adaptation} of neurons
+    \item Acts as implicit model ensemble\index{model ensemble}
+    \item Reduces overfitting without increasing computational cost\index{computational cost}
+\end{itemize}
+
+\subsubsection{Weight Decay (L2 Regularization)}\index{weight decay}\index{L2 regularization}
+\noindent
+Weight decay\index{weight decay!mechanism} adds a penalty term to the loss function\index{loss function} based on the magnitude of weights:
+
+\begin{equation}
+\mathcal{L}_\text{total} = \mathcal{L}_\text{original} + \lambda \sum_{w \in \text{weights}} \|w\|^2
+\end{equation}
+
+where $\lambda$\index{regularization strength} controls the strength of regularization. This technique:
+\begin{itemize}
+    \item Encourages smaller weight values\index{weight values}
+    \item Promotes smoother model behavior\index{model behavior}
+    \item Helps prevent extreme parameter values\index{parameter values}
+\end{itemize}
+
+\subsubsection{Early Stopping}\index{early stopping}
+\noindent
+Early stopping\index{early stopping!mechanism} monitors validation performance\index{validation performance} and stops training when performance begins to degrade:
+\begin{itemize}
+    \item Tracks validation metrics\index{validation metrics} across epochs\index{epochs}
+    \item Implements patience\index{early stopping!patience} to avoid stopping too early
+    \item Saves best model checkpoint\index{model checkpoint} based on validation performance
+\end{itemize}
+
+\subsection{Transformer-Specific Regularization}\index{transformer!regularization}
+
+\subsubsection{Attention Dropout}\index{attention dropout}
+\noindent
+In transformer architectures\index{transformer!architecture}, dropout is applied at multiple locations:
+\begin{itemize}
+    \item Attention weights dropout\index{attention!weights dropout}
+    \item Hidden state dropout\index{hidden state dropout}
+    \item Feed-forward layer dropout\index{feed-forward dropout}
+\end{itemize}
+
+\subsubsection{Layer Normalization}\index{layer normalization}
+\noindent
+Layer normalization\index{layer normalization!mechanism} helps stabilize training by normalizing activations\index{activation normalization}:
+
+\begin{equation}
+\text{LayerNorm}(x) = \gamma \odot \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta
+\end{equation}
+
+where $\gamma$ and $\beta$ are learnable parameters\index{learnable parameters}, and $\epsilon$ is a small constant for numerical stability\index{numerical stability}.
+
+\subsection{Practical Considerations}\index{practical considerations}
+
+\noindent
+When implementing regularization techniques\index{regularization!implementation}, consider:
+\begin{itemize}
+    \item \textbf{Hyperparameter Selection:}\index{hyperparameter selection}
+    \begin{itemize}
+        \item Dropout rate\index{dropout!rate} (typically 0.1-0.5)
+        \item Weight decay coefficient\index{weight decay!coefficient}
+        \item Early stopping patience\index{patience}
+    \end{itemize}
+    
+    \item \textbf{Monitoring:}\index{monitoring}
+    \begin{itemize}
+        \item Training vs. validation curves\index{learning curves}
+        \item Parameter magnitude distributions\index{parameter distributions}
+        \item Gradient statistics\index{gradient statistics}
+    \end{itemize}
+    
+    \item \textbf{Combination Effects:}\index{regularization!combinations}
+    \begin{itemize}
+        \item Different techniques may interact\index{technique interactions}
+        \item Need to balance multiple regularization methods\index{regularization balance}
+        \item Consider computational overhead\index{computational overhead}
+    \end{itemize}
+\end{itemize}
+
+\noindent
+Effective regularization\index{regularization!effective} is crucial for training robust language models\index{language models!robustness} that generalize well to unseen data\index{generalization!unseen data} while maintaining computational efficiency\index{computational efficiency}.
 

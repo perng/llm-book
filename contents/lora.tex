@@ -1,3 +1,9 @@
+% Mathematical formulation and intuition of LoRA
+\noindent
+LoRA takes a fundamentally different approach from traditional weight updates by leveraging low-rank decomposition. Instead of updating the entire weight matrix, it introduces a clever matrix factorization approach: adding a low-rank update matrix to the pretrained weights, expressed as $W + BA$ where $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R}^{r \times k}$ (equation~\ref{eq:lora_decomp}). This decomposition is motivated by the observation that the necessary weight updates during adaptation often lie in a low-dimensional subspace.
+
+The key insight behind LoRA is that while neural networks are typically overparameterized, the adaptations required for specific tasks might not need the full expressivity of the weight space. By constraining updates to a low-rank form, LoRA significantly reduces the number of trainable parameters while maintaining most of the model's capacity for adaptation. The rank $r$ serves as a crucial hyperparameter that controls the trade-off between computational efficiency and model expressivity—smaller ranks lead to more efficient training but might limit the model's ability to adapt, while larger ranks allow for more expressive adaptations at the cost of increased computation.
+
 % Mathematical formulation of LoRA
 \begin{itemize}
     \item Traditional weight updates vs. LoRA's low-rank decomposition
@@ -37,25 +43,17 @@ class LoRALayer:
 \end{pythoncode}
 
 % Advantages and practical considerations
-\begin{itemize}
-    \item Memory efficiency: Only training 
-    \begin{equation}\label{eq:lora_params}
-    r(d + k) \text{ parameters instead of } dk
-    \end{equation}
-    \item Faster training and inference compared to full fine-tuning
-    \item Ability to merge LoRA weights with base model for deployment
-\end{itemize}
+\noindent
+LoRA achieves significant parameter efficiency by introducing only $r(d + k)$ trainable parameters compared to the $dk$ parameters in full fine-tuning:
+\begin{equation}\label{eq:lora_params}
+\text{Parameters}_{\text{LoRA}} = r(d + k) \ll \text{Parameters}_{\text{full}} = dk
+\end{equation}
+where $d$ and $k$ are the dimensions of the original weight matrix, and $r$ is the low-rank dimension. This reduction in parameter count leads to faster training and inference times compared to full fine-tuning. Additionally, the architecture allows for seamless deployment by merging LoRA weights with the base model when needed.
 
 % Mathematical analysis
-\begin{itemize}
-    \item Theoretical foundations of low-rank updates
-    \item Impact on model capacity and expressiveness
-    \item Relationship to other parameter-efficient methods
-\end{itemize}
+\noindent
+The theoretical foundations of low-rank updates provide insights into LoRA's effectiveness. These updates influence the model's capacity and expressiveness in specific ways, demonstrating interesting relationships with other parameter-efficient methods. Understanding these mathematical properties helps explain why LoRA achieves strong performance despite its parameter efficiency.
 
 % Empirical results and best practices
-\begin{itemize}
-    \item Typical rank values for different tasks
-    \item Guidelines for setting the scaling factor $\alpha$
-    \item Performance comparisons with full fine-tuning
-\end{itemize} 
+\noindent
+Through extensive experimentation, researchers have identified optimal rank values for different types of tasks. The scaling factor $\alpha$ plays a crucial role in performance, with specific guidelines emerging for its selection based on task requirements. Empirical comparisons with full fine-tuning demonstrate that LoRA can achieve comparable or better performance while maintaining its efficiency advantages. 

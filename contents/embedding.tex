@@ -1,0 +1,58 @@
+\chapter{Embedding in Machine Learning}\index{embedding}
+
+\section{Introduction}
+
+\noindent
+Machine learning algorithms excel at processing numerical data, uncovering patterns and relationships within the sea of numbers. However, a significant portion of real-world information comes in the form of categorical data\index{categorical data} - discrete entities like words, users, or products. These cannot be directly fed into most algorithms. This is where the magic of \textbf{embedding}\index{embedding!definition} comes in.
+
+\section{Word Embeddings: Capturing the Essence of Language}\index{word embeddings}
+
+Word embeddings represent words as dense vectors\index{dense vectors}, capturing their semantic\index{semantics} and syntactic\index{syntax} relationships. Some popular methods include:
+
+\begin{itemize}[noitemsep]
+ \item \textbf{Word2Vec:}\index{Word2Vec} This method, introduced by~\cite{mikolov2013efficient}, learns word embeddings by training a neural network to predict a word given its context (Continuous Bag-of-Words\index{CBOW|see {Continuous Bag-of-Words}}\index{Continuous Bag-of-Words}) or predict the context given a word (Skip-gram\index{Skip-gram}).
+
+ \item \textbf{GloVe}\index{GloVe} (Global Vectors for Word Representation): Developed by~\cite{pennington2014glove}, GloVe leverages global word co-occurrence statistics\index{co-occurrence statistics} from a corpus.
+
+ \item \textbf{FastText:}\index{FastText} An extension of Word2Vec proposed by~\cite{bojanowski2017enriching}, FastText considers subword information\index{subword information} (character n-grams\index{n-grams}).
+\end{itemize}
+
+
+ \section{Item Embeddings: The Heart of Recommendation Systems}\index{embedding!item embeddings}\index{recommendation systems}
+
+\section{Graph Embeddings: Unveiling Network Structure}\index{embedding!graph embeddings}\index{graph embeddings}
+
+Graph embeddings represent nodes in a graph as vectors, capturing the graph structure and relationships between nodes. This is crucial in applications like social network analysis\index{social network analysis}, knowledge graph representation\index{knowledge graphs}, and link prediction\index{link prediction}.
+
+\begin{itemize}[noitemsep]  
+ \item \textbf{Node2Vec:}\index{Node2Vec} This method combines breadth-first search (BFS)\index{BFS|see {breadth-first search}}\index{breadth-first search} and depth-first search (DFS)\index{DFS|see {depth-first search}}\index{depth-first search} strategies.
+
+ \item \textbf{DeepWalk:}\index{DeepWalk} Treats random walks\index{random walks} on the graph as sentences and applies word embedding techniques.
+\end{itemize}
+
+\section{Summary and Future Directions}\index{embedding!future directions}
+
+\noindent
+Embeddings\index{embeddings!summary} have become a cornerstone of modern machine learning\index{machine learning}, enabling the transformation of discrete, categorical data\index{categorical data} into continuous vector spaces\index{vector spaces} that capture meaningful relationships\index{relationships!semantic}. Key takeaways include:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Versatility:}\index{embedding!versatility} From words to graphs, embeddings provide a unified framework for representing diverse types of data\index{data representation}.
+    
+    \item \textbf{Learned Representations:}\index{learned representations} Rather than hand-crafted features\index{features!hand-crafted}, embeddings are learned from data, capturing intrinsic patterns\index{patterns!intrinsic} and relationships.
+    
+    \item \textbf{Downstream Applications:}\index{downstream applications} Embeddings serve as foundational building blocks\index{building blocks} for numerous applications, from recommendation systems\index{recommendation systems} to natural language processing\index{natural language processing}.
+\end{itemize}
+
+\subsection{Emerging Trends}\index{embedding!trends}
+Recent developments point to several promising directions:
+\begin{itemize}[noitemsep]
+    \item \textbf{Multimodal Embeddings:}\index{multimodal embeddings} Jointly embedding different types of data (text, images, audio)\index{data types} in shared spaces\index{shared spaces}.
+    
+    \item \textbf{Dynamic Embeddings:}\index{dynamic embeddings} Representations that evolve over time\index{temporal evolution} to capture changing relationships\index{relationships!temporal}.
+    
+    \item \textbf{Interpretable Embeddings:}\index{interpretable embeddings} Methods for understanding and visualizing\index{visualization} what embeddings have learned.
+\end{itemize}
+
+\noindent
+As machine learning continues to advance, embeddings will likely play an increasingly crucial role in bridging the gap between raw data\index{raw data} and sophisticated AI systems\index{AI systems}, enabling more powerful and nuanced understanding of complex relationships in data\index{data relationships}.
+

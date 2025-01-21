@@ -2,6 +2,13 @@
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
 \usepackage{amsmath,amssymb,amsthm}
+
+% Add draft watermark
+\usepackage{draftwatermark}
+\SetWatermarkText{Draft}
+\SetWatermarkScale{2}
+\SetWatermarkColor[gray]{0.97}
+
 \usepackage[colorlinks=true,
             linkcolor=blue,
             filecolor=magenta,
@@ -11,12 +18,28 @@
             bookmarksopen=true]{hyperref}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage{pgfplots}
 \usepackage{minted}
+\usepackage{makeidx}
 \usepackage{enumitem}
 \setlist{noitemsep}
 
+% \usepackage{fontspec}
+% \setmainfont{xkcd}
+\usetikzlibrary{positioning, arrows.meta}
+
 \usepackage{tcolorbox}
 \tcbuselibrary{listings,minted,skins,breakable}
+
+\usepackage[
+    backend=bibtex,
+    style=numeric,
+    sorting=none,
+    citestyle=numeric,
+    bibstyle=numeric,    
+    autocite=inline
+]{biblatex}
+\addbibresource{references.bib}
 
 \newtcblisting{pythoncode}[1][Python Implementation]{
   listing engine=minted,
@@ -36,9 +59,22 @@
 \let\oldtableofcontents\tableofcontents
 \renewcommand{\tableofcontents}{\oldtableofcontents\clearpage}
 
-\title{A Mathematical Introduction to Large Language Models}
-\author{Author Name}
+\title{A Beginner's Guide to Large Language Models}
+\author{Chang-Shing Perng}
 \date{\today}
+
+% \makeatletter
+% \let\old@part\part
+% \renewcommand{\part}[1]{%
+%     \old@part{#1}%
+%     \suppressfloats[t]% Prevent floats from separating title and text
+%     \nopagebreak[4]% Strong request to not break page after title
+% }
+% \makeatother
+
+\makeindex
+
+\usepackage{subcaption}  % For subfigure environment
 
 \begin{document}
 
@@ -56,13 +92,13 @@ Large Language Models (LLMs) have fundamentally transformed Natural Language Pro
 \input{contents/what_makes_llms_different.tex}
 \input{contents/book_organization.tex}
 
-\chapter{Essential Mathematics}
-\noindent
-A solid grasp of linear algebra, calculus, and probability is vital for understanding how large language models learn from vast textual data. In this chapter, we review the core mathematical principles that underpin neural network operations, optimization procedures, and the statistical modeling approaches integral to LLMs. By establishing these fundamentals, readers will be well-equipped to dive into more specialized topics in subsequent chapters.
+% \chapter{Essential Mathematics}
+% \noindent
+% A solid grasp of linear algebra, calculus, and probability is vital for understanding how large language models learn from vast textual data. In this chapter, we review the core mathematical principles that underpin neural network operations, optimization procedures, and the statistical modeling approaches integral to LLMs. By establishing these fundamentals, readers will be well-equipped to dive into more specialized topics in subsequent chapters.
 
-\input{contents/linear_algebra.tex}
-\input{contents/calculus.tex}
-\input{contents/probability.tex}
+% \input{contents/linear_algebra.tex}
+% \input{contents/calculus.tex}
+% \input{contents/probability.tex}
 
 
 \chapter{Machine Learning Fundamentals}
@@ -72,6 +108,8 @@ Before delving into the specific architecture of LLMs, it is crucial to have a f
 \input{contents/review_of_supervised_and_unsupervised_learning.tex}
 \input{contents/neural_networks_101.tex}
 \input{contents/reg_and_gen.tex}
+\input{contents/embedding.tex}
+
 
 \part{Transformer Architecture and Attention}
 
@@ -85,31 +123,54 @@ The invention of attention-based methods revolutionized NLP by enabling models t
 
 
 \chapter{Transformer Encoder-Decoder Structure}
+\label{chap:transformer_structure}
+
 \noindent
-Building upon attention, the Transformer architecture introduces a powerful encoder-decoder framework that handles complex sequence-to-sequence tasks efficiently. This chapter explores how positional encodings, residual connections, and normalization layers come together in both encoder and decoder blocks. By the end, you will see how all these components integrate mathematically to form the backbone of modern LLMs.
+The encoder-decoder architecture represents a powerful paradigm for transforming one sequence into another. Think of it as a two-stage process:
+
+\begin{itemize}
+    \item \textbf{The Encoder} acts like a sophisticated reader, processing the input sequence (e.g., a French sentence) and creating a rich, contextual understanding of it. Each input token gets updated to reflect its relationships with all other tokens in the sequence.
+    
+    \item \textbf{The Decoder} acts as a skilled writer, generating the output sequence (e.g., an English translation) one token at a time. At each step, it:
+    \begin{itemize}
+        \item Looks at what it has generated so far (self-attention)
+        \item Consults the encoder's understanding of the input (cross-attention)
+        \item Decides what token to generate next
+    \end{itemize}
+\end{itemize}
+
+\noindent
+This separation of "understanding" and "generation" tasks allows the model to:
+\begin{itemize}
+    \item Capture complex relationships in the input (encoder)
+    \item Maintain coherence in the output (decoder)
+    \item Create flexible mappings between input and output sequences
+\end{itemize}
+
+\noindent
+Building upon attention, the Transformer architecture implements this encoder-decoder framework efficiently. This chapter explores how positional encodings, residual connections, and normalization layers come together in both encoder and decoder blocks. By the end, you will see how all these components integrate mathematically to form the backbone of modern LLMs.
 
 \input{contents/positional_encodings.tex}
 \input{contents/encoder_block.tex}
 
+\input{contents/transformer_walkthrough.tex}
 \part{Training Large Language Models}
-\input{contents/lm_pretraining.tex}
 \input{contents/large_scale_optimization.tex}
 \input{contents/scaling_laws.tex}
+\input{contents/data_preparation.tex}
 
 \part{Advanced Topics and Future Directions}
 \input{contents/fine_tuning_and_prompt_engineering.tex}
+\input{contents/mixture_of_experts.tex}
 \input{contents/emergent_abilities_and_interpretability.tex}
 \input{contents/efficient_serving_and_deployment.tex}
+\input{contents/benchmarking_llm.tex}
 \input{contents/future_directions.tex}
 
 \part{Conclusion and Resources}
 \input{contents/conclusion.tex}
 
-\appendix
-\chapter{Mathematical Proofs and Derivations}
-
-\chapter{Notation Guide}
-
-\chapter{Glossary of Terms}
+\printbibliography
+\printindex
 
 \end{document}

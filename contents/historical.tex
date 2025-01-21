@@ -52,17 +52,17 @@ Despite their simplicity and shortcomings, n-gram models laid an important found
 % PROMPT: Discuss the shift from statistical approaches to neural network-based language models
 
 \noindent
-While n-gram models offered a foundational statistical approach to language modeling, they were increasingly limited by their inability to capture long-range dependencies. This shortcoming, in tandem with growing computational capabilities, paved the way for \textbf{neural language models}. Unlike n-gram models, which rely on explicit counts of co-occurrences, neural models learn continuous vector representations (embeddings) that capture semantic relationships between words in a high-dimensional space.
+While n-gram models offered a foundational statistical approach to language modeling, they were increasingly limited by their inability to capture long-range dependencies. This shortcoming, in tandem with growing computational capabilities, paved the way for \textbf{neural language models}. The foundational work on backpropagation by \emph{Rumelhart et al.}~\cite{rumelhart1986learning} and early experiments with simple recurrent networks by \emph{Elman}~\cite{elman1990finding} laid the groundwork for neural approaches to sequence modeling.
 
 \begin{itemize}
     \item \textbf{The Introduction of Distributed Representations.}
-    Pioneering work by \emph{Bengio et al.} introduced the concept of learned word embeddings, replacing one-hot word vectors with dense, low-dimensional representations. This shift helped alleviate data sparsity and allowed models to generalize better to unseen n-grams by placing related words closer together in the embedding space.
+    Pioneering work by \emph{Bengio et al.}~\cite{bengio2003neural} introduced the concept of learned word embeddings, replacing one-hot word vectors with dense, low-dimensional representations. This shift helped alleviate data sparsity and allowed models to generalize better to unseen n-grams by placing related words closer together in the embedding space.
 
     \item \textbf{The Rise of Recurrent Neural Networks (RNNs).}
-    RNN-based architectures quickly became a popular choice for sequence modeling. By maintaining a hidden state that is updated at each time step, RNNs can theoretically encode information from all previous tokens in a sequence. 
+    RNN-based architectures~\cite{graves2013generating} quickly became a popular choice for sequence modeling. By maintaining a hidden state that is updated at each time step, RNNs can theoretically encode information from all previous tokens in a sequence. 
     \begin{itemize}
-        \item \textit{Vanilla RNNs} often faced vanishing or exploding gradients when handling long sequences, leading to difficulties in capturing context over longer spans of text.
-        \item \textit{Long Short-Term Memory (LSTM)} networks and \textit{Gated Recurrent Units (GRUs)} introduced gating mechanisms to mitigate these gradient issues, enabling better information flow across many time steps.
+        \item \textit{Vanilla RNNs} often faced vanishing or exploding gradients when handling long sequences~\cite{pascanu2013difficulty}, leading to difficulties in capturing context over longer spans of text.
+        \item \textit{Long Short-Term Memory (LSTM)}~\cite{hochreiter1997long} networks and \textit{Gated Recurrent Units (GRUs)}~\cite{cho2014learning} introduced gating mechanisms to mitigate these gradient issues, enabling better information flow across many time steps.
     \end{itemize}
     Despite their improvements over n-gram models, RNN-based architectures were still computationally intensive, often needing sequential processing for each token.
 
@@ -70,7 +70,7 @@ While n-gram models offered a foundational statistical approach to language mode
     Around the same time, \texttt{Word2Vec} and \texttt{Glove} emerged as popular methods for learning distributed word representations outside of a full neural language model framework. These methods optimized simpler objectives (e.g., skip-gram, continuous bag-of-words, or global co-occurrence matrices) to produce embeddings that captured semantic and syntactic regularities.
 
     \item \textbf{Limitations and the Search for Parallelism.}
-    Although RNNs and LSTMs represented a breakthrough in language modeling, they remained sequential in nature—each token’s representation depended on the previous token’s output. This sequential dependency limited parallelization and made training on extremely large corpora slow and costly. Researchers began to explore alternative architectures that could better exploit GPU parallelism and handle longer contexts without exponential growth in training time.
+    Although RNNs and LSTMs represented a breakthrough in language modeling, they remained sequential in nature—each token's representation depended on the previous token's output. This sequential dependency limited parallelization and made training on extremely large corpora slow and costly. Researchers began to explore alternative architectures that could better exploit GPU parallelism and handle longer contexts without exponential growth in training time.
 \end{itemize}
 
 \noindent
@@ -81,24 +81,26 @@ In short, the transition to neural language models marked a pivotal moment in NL
 % PROMPT: Highlight how the Transformer architecture revolutionized NLP and led to massive LLMs
 
 \noindent
-Building on the foundations laid by RNN-based approaches, the \textbf{Transformer} architecture, introduced by \emph{Vaswani et al.} in 2017, marked a paradigm shift in Natural Language Processing (NLP). Instead of relying on recurrent connections (or convolutions) to process sequences, Transformers use a fully \emph{attention-based} mechanism to model complex dependencies in parallel. This design not only alleviated many of the bottlenecks found in RNNs but also enabled significant performance improvements across a broad spectrum of NLP tasks.
+Building on the foundations laid by RNN-based approaches~\cite{hochreiter1997long}, the \textbf{Transformer} architecture, introduced by \emph{Vaswani et al.}~\cite{vaswani2017attention} in 2017, marked a paradigm shift in Natural Language Processing (NLP). Instead of relying on recurrent connections (or convolutions) to process sequences, Transformers use a fully \emph{attention-based} mechanism to model complex dependencies in parallel. This design not only alleviated many of the bottlenecks found in RNNs but also enabled significant performance improvements across a broad spectrum of NLP tasks.
 
 \begin{itemize}
     \item \textbf{Key Innovation: Self-Attention.} 
-    The Transformer’s core operation, called \textit{self-attention}, allows the model to weigh the importance of different parts of a sequence to each other \emph{in parallel}, without processing tokens one at a time. This is especially advantageous for capturing long-range dependencies since each token can “attend to” any other token directly. Moreover, it opens the door for massively parallel computations on modern GPUs or TPUs.
+    The Transformer's core operation, called \textit{self-attention}, allows the model to weigh the importance of different parts of a sequence to each other \emph{in parallel}, without processing tokens one at a time. This is especially advantageous for capturing long-range dependencies since each token can "attend to" any other token directly. Moreover, it opens the door for massively parallel computations on modern GPUs or TPUs.
 
     \item \textbf{Positional Encoding and Multi-Head Attention.}
     Because Transformers discard recurrence, they need a method to encode the order of tokens in a sequence. \emph{Positional encoding} injects information about token positions through either sinusoidal or learned embeddings. The model also employs \textit{multi-head attention}, which processes attention in multiple parallel subspaces, allowing it to capture diverse relationships within the input.
 
     \item \textbf{Scalability and Performance.}
-    With attention-based operations, Transformers proved substantially more scalable than RNNs. Training could be distributed over large GPU clusters, and the architecture could handle \emph{very} long context windows effectively. This scalability was quickly exploited by researchers and industry practitioners, who trained Transformers on massive text corpora, producing what are now commonly called \textbf{Large Language Models (LLMs)}.
+    With attention-based operations, Transformers proved substantially more scalable than RNNs. Training could be distributed over large GPU clusters, and the architecture could handle \emph{very} long context windows effectively. This scalability was quickly exploited by researchers and industry practitioners~\cite{brown2020language}, who trained Transformers on massive text corpora, producing what are now commonly called \textbf{Large Language Models (LLMs)}.
 
     \item \textbf{Examples of LLMs: BERT, GPT, and Beyond.}
     Since the debut of the Transformer, several influential LLMs have emerged:
     \begin{itemize}
-        \item \textit{BERT (Bidirectional Encoder Representations from Transformers)} demonstrated the power of masked language modeling for capturing bidirectional context, achieving state-of-the-art results on numerous NLP benchmarks.
-        \item \textit{GPT (Generative Pretrained Transformer)} focused on unidirectional (left-to-right) language modeling, enabling impressive generative capabilities and pioneering few-shot and zero-shot learning approaches when scaled up (e.g., GPT-2, GPT-3).
-        \item Subsequent models (e.g., \textit{T5, XLNet, RoBERTa}) introduced new training objectives, larger parameter counts, and improved performances on benchmarks from question answering to machine translation.
+        \item \textit{BERT (Bidirectional Encoder Representations from Transformers)}~\cite{devlin2018bert} demonstrated the power of masked language modeling for capturing bidirectional context, achieving state-of-the-art results on numerous NLP benchmarks.
+        
+        \item \textit{GPT (Generative Pretrained Transformer)} series~\cite{radford2018improving,radford2019language} focused on unidirectional (left-to-right) language modeling, enabling impressive generative capabilities and pioneering few-shot and zero-shot learning approaches when scaled up.
+        
+        \item Subsequent models like \textit{T5}~\cite{raffel2020exploring}, \textit{XLNet}~\cite{yang2019xlnet}, and \textit{RoBERTa}~\cite{liu2019roberta} introduced new training objectives, larger parameter counts, and improved performances on benchmarks from question answering to machine translation.
     \end{itemize}
 
     \item \textbf{Impact on the Field.}

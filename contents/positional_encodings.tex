@@ -25,34 +25,15 @@ In the original Transformer architecture, each position $pos$ in the input seque
 
 \subsection{Alternative Positional Encoding Methods}
 \noindent
-While sinusoidal encodings are conceptually elegant, multiple alternatives have emerged to address various use cases or potentially improve performance:
-\begin{itemize}
-    \item \textbf{Learned Positional Embeddings.}
-    Instead of a fixed function of positions, learned embeddings assign a trainable vector to each possible position index. This approach can sometimes improve performance on in-distribution sequence lengths, but may generalize poorly to much longer sequences than seen in training.
+While sinusoidal encodings are conceptually elegant, multiple alternatives have emerged to address various use cases:
 
-    \item \textbf{Relative Position Representations.}
-    Particularly in models designed for language tasks like BERT or T5, \emph{relative} positions can be more meaningful than absolute indices. Relative positional embeddings let the model learn how tokens relate to each other’s positions, often leading to better handling of long sequences and repetitive patterns.
+\textbf{Learned Positional Embeddings}\index{positional embeddings!learned} assign a trainable vector to each possible position index. This approach can sometimes improve performance on in-distribution sequence lengths but may generalize poorly to longer sequences than seen in training.
 
-    \item \textbf{Rotary Positional Embeddings (RoPE).}
-    In some recent designs, rotary embeddings rotate query and key vectors in a complex plane according to their positions, potentially improving how attention scales with longer contexts. This method has gained traction in some large language models for better long-sequence extrapolation.
+\textbf{Relative Position Representations}\index{positional embeddings!relative} focus on how tokens relate to each other's positions rather than absolute indices. This approach often leads to better handling of long sequences and repetitive patterns, particularly in models like BERT or T5.
 
-    \item \textbf{Mixtures of Encodings.}
-    Some architectures combine different forms of positional encoding—e.g., adding a learned component on top of a sinusoidal base—to strike a balance between generalization and flexibility.
-\end{itemize}
+\textbf{Rotary Positional Embeddings (RoPE)}\index{positional embeddings!rotary} rotate query and key vectors in a complex plane according to their positions, potentially improving how attention scales with longer contexts. This method has gained traction in some large language models for better long-sequence extrapolation.
+
+\textbf{Mixtures of Encodings}\index{positional embeddings!hybrid} combine different forms of positional encoding—e.g., adding a learned component on top of a sinusoidal base—to strike a balance between generalization and flexibility.
 
 \noindent
 No single encoding method universally dominates; choice often depends on the target domain (e.g., natural language vs. code), desired sequence lengths, and computational constraints. Regardless of the specific approach, \textbf{positional encodings} remain a critical design component, ensuring that Transformers can accurately model the order and structure of sequential data.
-
-% Sinusoidal position encoding
-\begin{equation}\label{eq:pos_enc_sin}
-PE_{(pos,2i)} = \sin(pos/10000^{2i/d_{\text{model}}})
-\end{equation}
-
-\begin{equation}\label{eq:pos_enc_cos}
-PE_{(pos,2i+1)} = \cos(pos/10000^{2i/d_{\text{model}}})
-\end{equation}
-
-% Relative positional encoding
-\begin{equation}\label{eq:rel_pos_enc}
-\text{RelPos}(i,j) = \mathbf{E}_{i-j} \cdot \mathbf{W}_{\text{rel}}
-\end{equation}

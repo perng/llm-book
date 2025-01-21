@@ -1,15 +1,89 @@
-\chapter{Fine-Tuning and Prompt Engineering}
+\chapter{Fine-Tuning and Prompt Engineering}\index{fine-tuning}\index{prompt engineering}
 \label{chap:fine_tuning_prompt}
 
 \noindent
-Modern Large Language Models (LLMs) are typically trained on massive corpora in a self-supervised manner, after which they can be adapted to specific tasks or domains via \textbf{fine-tuning} or \textbf{prompt engineering}. This chapter explores different approaches to fine-tuning—both full and parameter-efficient—and demonstrates how strategically designed prompts can elicit strong zero-shot and few-shot performance from LLMs.
+Modern Large Language Models (LLMs)\index{LLM|see {Large Language Model}} are typically trained on massive corpora in a self-supervised manner\index{self-supervised training}, after which they can be adapted to specific tasks or domains via \textbf{fine-tuning}\index{fine-tuning!definition} or \textbf{prompt engineering}\index{prompt engineering!definition}. This chapter explores different approaches to fine-tuning—both full\index{fine-tuning!full} and parameter-efficient\index{fine-tuning!parameter-efficient}—and demonstrates how strategically designed prompts can elicit strong zero-shot\index{zero-shot} and few-shot\index{few-shot} performance from LLMs.
+
+\section{The Fine-Tuning Spectrum}\index{fine-tuning!spectrum}
+\noindent
+Fine-tuning represents a continuum of adaptation approaches, ranging from full model updates to minimal parameter modifications:
+
+\subsection{Full Fine-Tuning}\index{fine-tuning!full}
+\noindent
+Traditional fine-tuning updates all model parameters on task-specific data. While this approach offers maximum flexibility, it presents several challenges:
+
+\textbf{Resource Requirements.}\index{fine-tuning!resource requirements} Full fine-tuning of large models demands substantial computational resources, often requiring distributed training across multiple GPUs. For example, fine-tuning a 175B parameter model might require hundreds or thousands of GPU hours.
+
+\textbf{Catastrophic Forgetting.}\index{catastrophic forgetting} Aggressive fine-tuning can cause the model to "forget" its pre-trained knowledge, especially with small datasets. This necessitates careful learning rate scheduling and early stopping strategies.
+
+\textbf{Storage Overhead.}\index{storage overhead} Each fine-tuned version requires storing a complete copy of the model parameters, making it impractical to maintain multiple task-specific variants of large models.
+
+\subsection{Parameter-Efficient Fine-Tuning}\index{fine-tuning!parameter-efficient}
+\noindent
+Recent advances have introduced methods that update only a small subset of parameters or add a small number of new parameters:
+
+\textbf{LoRA (Low-Rank Adaptation)}\index{LoRA} decomposes weight updates into low-rank matrices, dramatically reducing the number of trainable parameters while maintaining performance. The mathematical foundations and implementation details are covered in Section~\ref{subsec:lora}.
+
+\textbf{Prompt Tuning}\index{prompt tuning} learns continuous prompt embeddings while keeping the base model frozen. This approach offers several advantages:
+\begin{itemize}
+    \item Minimal parameter overhead (typically <1% of model size)
+    \item Easy task switching by swapping prompt embeddings
+    \item Competitive performance with full fine-tuning on many tasks
+\end{itemize}
+
+\section{Prompt Engineering Strategies}\index{prompt engineering!strategies}
+\noindent
+Effective prompt engineering requires understanding both the capabilities and limitations of LLMs. Key strategies include:
+
+\subsection{Chain-of-Thought Prompting}\index{chain-of-thought prompting}
+\noindent
+This technique encourages step-by-step reasoning by demonstrating intermediate thought processes in the prompt. For example:
+
+\begin{verbatim}
+Q: A shirt costs $25. If there's a 20% discount, what's the final price?
+A: Let's solve this step by step:
+1. Calculate 20% of $25: $25 × 0.20 = $5
+2. Subtract the discount: $25 - $5 = $20
+Therefore, the final price is $20.
+\end{verbatim}
+
+\subsection{Role and Context Specification}\index{prompt engineering!role specification}
+\noindent
+Clearly defining the model's role and context can significantly improve output quality:
+
+\begin{verbatim}
+You are an expert mathematician explaining concepts to a high school student.
+Explain the quadratic formula in simple terms, using real-world examples.
+\end{verbatim}
+
+\section{Hybrid Approaches}\index{hybrid approaches}
+\noindent
+Many modern applications combine fine-tuning and prompt engineering:
+
+\textbf{Instruction Tuning + Prompting}\index{instruction tuning} involves fine-tuning on instruction-following data, then using carefully crafted prompts to guide the model's behavior. This approach has proven particularly effective for complex reasoning tasks.
+
+\textbf{Few-Shot Learning with Fine-Tuned Models}\index{few-shot learning} uses fine-tuning to improve the model's base capabilities, then leverages few-shot prompting for task-specific adaptation. This combination often achieves better results than either approach alone.
+
+\section{Evaluation and Iteration}\index{evaluation}
+\noindent
+Developing effective fine-tuning and prompting strategies requires systematic evaluation and iteration:
+
+\textbf{Quantitative Metrics}\index{evaluation!metrics} include task-specific measures like accuracy, F1-score, and ROUGE, as well as general metrics like perplexity and cross-entropy.
+
+\textbf{Qualitative Analysis}\index{evaluation!qualitative} involves manual review of model outputs, focusing on:
+\begin{itemize}
+    \item Consistency across similar inputs
+    \item Adherence to specified constraints
+    \item Quality of reasoning and explanations
+    \item Handling of edge cases
+\end{itemize}
 
 % PROMPT: Show a side-by-side comparison of full fine-tuning vs. LoRA
-\section{Methods of Fine-Tuning}
+\section{Methods of Fine-Tuning}\index{fine-tuning!methods}
 \label{sec:methods_finetune}
 
 \noindent
-Fine-tuning typically involves updating a model’s parameters on a target dataset after it has been pre-trained on a large, diverse corpus. However, \emph{full fine-tuning} can be computationally expensive and may risk overfitting on smaller datasets. Recent research has introduced \textbf{parameter-efficient} approaches that significantly reduce the number of trainable parameters while preserving performance.
+Fine-tuning typically involves updating a model's parameters on a target dataset\index{dataset!target} after it has been pre-trained\index{pre-training} on a large, diverse corpus. However, \emph{full fine-tuning}\index{fine-tuning!full} can be computationally expensive\index{computational cost} and may risk overfitting\index{overfitting} on smaller datasets. Recent research has introduced \textbf{parameter-efficient}\index{parameter efficiency} approaches that significantly reduce the number of trainable parameters while preserving performance.
 
 \subsubsection*{Full Fine-Tuning vs. LoRA (High-Level Comparison)}
 \begin{center}
@@ -18,7 +92,7 @@ Fine-tuning typically involves updating a model’s parameters on a target datas
 \hline
 \textbf{Aspect} & \textbf{Full Fine-Tuning} & \textbf{LoRA} \\ \hline
 \textbf{Trainable Parameters} 
-& \(\sim\!100\%\) of the model’s parameters are updated 
+& \(\sim\!100\%\) of the model's parameters are updated 
 & Only a small fraction of parameters (low-rank matrices) are updated \\
 
 \textbf{Memory Footprint} 
@@ -39,36 +113,36 @@ Fine-tuning typically involves updating a model’s parameters on a target datas
 \end{tabular}
 \end{center}
 
-\subsection{Low-Rank Adaptation (LoRA)}
+\subsection{Low-Rank Adaptation (LoRA)}\index{LoRA}\index{low-rank adaptation}
 \label{subsec:lora}
 \input{contents/lora.tex}
 
-\subsection{Other Parameter-Efficient Methods}
+\subsection{Other Parameter-Efficient Methods}\index{parameter-efficient methods}
 \noindent
-Beyond LoRA, several other techniques aim to reduce the computational and memory costs of fine-tuning:
+Beyond LoRA, several other techniques aim to reduce the computational and memory costs\index{memory costs} of fine-tuning:
 \begin{itemize}
-    \item \textbf{Adapters.} Introduced in the context of computer vision and NLP, \emph{adapters} insert small “bottleneck” layers in each block of a Transformer. Only these adapter layers are trained, while the rest of the parameters remain frozen.
-    \item \textbf{Prompt Tuning / Prefix Tuning.} Instead of modifying the model’s core parameters, special “prompt” or “prefix” tokens are learned and prepended to the input sequence. The base model weights remain static, relying on these learned vectors to steer predictions.
-    \item \textbf{BitFit.} Proposes fine-tuning only the bias terms in each layer, drastically reducing the parameter footprint while retaining moderate performance.
+    \item \textbf{Adapters.}\index{adapters} Introduced in the context of computer vision\index{computer vision} and NLP\index{NLP}, \emph{adapters} insert small "bottleneck" layers\index{bottleneck layers} in each block of a Transformer. Only these adapter layers are trained, while the rest of the parameters remain frozen.
+    \item \textbf{Prompt Tuning / Prefix Tuning.}\index{prompt tuning}\index{prefix tuning} Instead of modifying the model's core parameters, special "prompt" or "prefix" tokens\index{tokens!prompt}\index{tokens!prefix} are learned and prepended to the input sequence. The base model weights remain static, relying on these learned vectors to steer predictions.
+    \item \textbf{BitFit.}\index{BitFit} Proposes fine-tuning only the bias terms\index{bias terms} in each layer, drastically reducing the parameter footprint while retaining moderate performance.
 \end{itemize}
 
 \noindent
-All these methods share a common goal: retain most of the pre-trained model’s knowledge while introducing minimal, task-specific parameter updates. This can be crucial when dealing with large models where full fine-tuning becomes prohibitively expensive.
+All these methods share a common goal: retain most of the pre-trained model's knowledge while introducing minimal, task-specific parameter updates. This can be crucial when dealing with large models where full fine-tuning becomes prohibitively expensive.
 
 % PROMPT: Demonstrate a few-shot prompting scenario
-\section{Prompt Engineering and In-Context Learning}
+\section{Prompt Engineering and In-Context Learning}\index{prompt engineering}\index{in-context learning}
 \label{sec:prompt_engineering}
 
 \noindent
-\textbf{Prompt engineering} manipulates the input context presented to an LLM to guide its output behavior, often without updating any model parameters at all. This approach relies on the idea of \emph{in-context learning}: the model’s attention mechanism can glean instructions and few-shot examples directly from the prompt.
+\textbf{Prompt engineering}\index{prompt engineering!techniques} manipulates the input context\index{input context} presented to an LLM to guide its output behavior, often without updating any model parameters at all. This approach relies on the idea of \emph{in-context learning}\index{in-context learning!definition}: the model's attention mechanism\index{attention mechanism} can glean instructions and few-shot examples\index{few-shot examples} directly from the prompt.
 
-\subsection{Few-Shot and Zero-Shot Prompting}
+\subsection{Few-Shot and Zero-Shot Prompting}\index{prompting!few-shot}\index{prompting!zero-shot}
 \begin{itemize}
-    \item \textbf{Zero-Shot Prompting.} The model is given only a task description or question without explicit in-task examples. For instance:
+    \item \textbf{Zero-Shot Prompting.}\index{zero-shot!prompting} The model is given only a task description\index{task description} or question without explicit in-task examples. For instance:
 \begin{verbatim}
 "Explain in simple terms why the sky is blue."
 \end{verbatim}
-    \item \textbf{Few-Shot Prompting.} A small number of demonstrations (input-output examples) are included in the prompt. For example:
+    \item \textbf{Few-Shot Prompting.}\index{few-shot!prompting} A small number of demonstrations\index{demonstrations} (input-output examples\index{examples!input-output}) are included in the prompt. For example:
 \begin{verbatim}
  Q: What is the capital of France? 
  A: Paris
@@ -80,48 +154,54 @@ All these methods share a common goal: retain most of the pre-trained model’s 
 \end{itemize}
 
 \noindent
-\textbf{Why It Works:} The multi-head self-attention in Transformers effectively reweights relevant parts of the prompt. This “hint” or “instruction” setup can drastically improve performance on tasks for which the model hasn’t been explicitly fine-tuned.
+\textbf{Why It Works:} The multi-head self-attention in Transformers effectively reweights relevant parts of the prompt. This "hint" or "instruction" setup can drastically improve performance on tasks for which the model hasn't been explicitly fine-tuned.
 
-\subsection{The Math Behind Attention Re-Weighting}
+\subsection{The Math Behind Attention Re-Weighting}\index{attention!re-weighting}
 \noindent
-When you prepend or inject prompt tokens into the sequence, they become part of the \(\mathbf{Q}, \mathbf{K}, \mathbf{V}\) matrices in the \textbf{scaled dot-product attention}:
+When you prepend or inject prompt tokens into the sequence, they become part of the \(\mathbf{Q}, \mathbf{K}, \mathbf{V}\) matrices\index{attention!matrices} in the \textbf{scaled dot-product attention}\index{attention!scaled dot-product}:
 \[
-\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) 
-= 
-\text{softmax}\Bigl(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d_k}}\Bigr)\,\mathbf{V}.
+\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\Bigl(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d_k}}\Bigr)\,\mathbf{V}.
 \]
 The inserted prompt tokens can influence:
 \begin{itemize}
-    \item Which tokens the model “attends” to in a few-shot example (keys/values).
+    \item Which tokens the model "attends" to in a few-shot example (keys/values).
     \item How strongly the model weights certain prompt tokens (queries).
 \end{itemize}
 In effect, the \emph{prompt} guides the attention distribution to emulate training examples on the fly.
 
 % PROMPT: Recommend metrics for zero-shot vs. fine-tuned models
-\section{Evaluation Metrics and Challenges}
+\section{Evaluation Metrics and Challenges}\index{evaluation!metrics}\index{evaluation!challenges}
 \label{sec:metrics_challenges}
 
-\subsection{BLEU, ROUGE, Perplexity, and Beyond}
+\subsection{BLEU, ROUGE, Perplexity, and Beyond}\index{BLEU}\index{ROUGE}\index{perplexity}
 \noindent
-When assessing the quality of outputs—whether from zero-shot prompts or fine-tuned models—common \textbf{automatic metrics} include:
+When assessing the quality of outputs—whether from zero-shot prompts or fine-tuned models—common \textbf{automatic metrics}\index{metrics!automatic} include:
 \begin{itemize}
-    \item \textbf{BLEU (Bilingual Evaluation Understudy).} Measures n-gram overlap between generated text and reference translations; popular in machine translation.
-    \item \textbf{ROUGE (Recall-Oriented Understudy for Gisting Evaluation).} Focuses on recall of n-grams or sequences for summarization tasks.
-    \item \textbf{Perplexity (PPL).} Often used to gauge how well the language model predicts a sequence. Lower perplexity means the model is less “surprised” by the data.
+    \item \textbf{BLEU}\index{BLEU!definition} Measures n-gram overlap\index{n-gram overlap} between generated text and reference translations; popular in machine translation.
+    \item \textbf{ROUGE}\index{ROUGE!definition} Focuses on recall of n-grams or sequences for summarization tasks\index{summarization}.
+    \item \textbf{Perplexity}\index{perplexity!definition} Often used to gauge how well the language model predicts a sequence. Lower perplexity means the model is less "surprised" by the data.
     \item \textbf{Other Task-Specific Metrics.} Accuracy, F1-score, or exact match for classification and QA tasks; meteor, CIDEr, or SPICE for image-caption tasks.
 \end{itemize}
 
-\subsection{Human vs. Automated Evaluations}
+\subsection{Human vs. Automated Evaluations}\index{evaluation!human}\index{evaluation!automated}
 \noindent
-\textbf{Automatic metrics} are convenient but may not capture nuanced qualities such as factual correctness, coherence, and style. For tasks like open-ended generation or complex QA, \textbf{human evaluations} often remain the gold standard:
+\textbf{Automatic metrics}\index{metrics!automatic} are convenient but may not capture nuanced qualities such as factual correctness\index{factual correctness}, coherence\index{coherence}, and style\index{style}. For tasks like open-ended generation\index{generation!open-ended} or complex QA\index{question answering}, \textbf{human evaluations}\index{evaluation!human} often remain the gold standard:
 \begin{itemize}
     \item \textbf{Annotator Bias.} Human reviewers might be inconsistent or exhibit bias in judging model outputs, necessitating structured guidelines or multiple reviewers.
     \item \textbf{Cost and Scalability.} Large-scale human evaluations are expensive and time-consuming, so hybrid approaches that combine automatic filtering with targeted human checks are common.
 \end{itemize}
 
 \noindent
-In practice, balancing \emph{automated metrics} with periodic \emph{human assessments} tends to yield the best insights into an LLM’s true capabilities and limitations—especially in scenarios where precision and reliability are paramount.
+In practice, balancing \emph{automated metrics} with periodic \emph{human assessments} tends to yield the best insights into an LLM's true capabilities and limitations—especially in scenarios where precision and reliability are paramount.
 
 \bigskip
 \noindent
-\textbf{Summary.} Fine-tuning and prompt engineering represent two complementary paths to adapt powerful pre-trained LLMs to specific tasks and contexts. While full fine-tuning modifies all of a model’s parameters, LoRA and other parameter-efficient techniques drastically reduce resource demands. Meanwhile, effective prompting can elicit strong few-shot and zero-shot performance without altering a single weight. By coupling these adaptation methods with appropriate evaluation strategies, practitioners can leverage the full breadth of modern LLMs’ capabilities. 
+\textbf{Summary.} Fine-tuning and prompt engineering represent two complementary paths to adapt powerful pre-trained LLMs to specific tasks and contexts. While full fine-tuning modifies all of a model's parameters, LoRA and other parameter-efficient techniques drastically reduce resource demands. Meanwhile, effective prompting can elicit strong few-shot and zero-shot performance without altering a single weight. By coupling these adaptation methods with appropriate evaluation strategies, practitioners can leverage the full breadth of modern LLMs' capabilities. 
+
+\section{Fine-Tuning and Prompt Engineering}
+\label{sec:fine_tuning}
+
+\noindent
+As models grow larger~\cite{brown2020language}, efficient fine-tuning becomes crucial. Methods like LoRA~\cite{hu2021lora} and QLoRA~\cite{dettmers2023qlora} enable parameter-efficient adaptation...
+
+Instruction tuning~\cite{ouyang2022training} has emerged as a powerful way to improve model capabilities.

@@ -1,0 +1,133 @@
+\chapter{Data Preparation for Large Language Models}
+\label{chap:data_preparation}
+
+\noindent
+Building a Large Language Model (LLM)\index{LLM|see {Large Language Model}}\index{Large Language Model} begins with assembling and preprocessing\index{preprocessing} massive text corpora that reflect the linguistic richness and domain diversity needed to train a high-capacity model. Careful data curation\index{data!curation}, cleaning\index{data!cleaning}, and tokenization\index{tokenization} significantly influence a model's final performance and behavior. In this chapter, we explore the key steps in preparing data for LLM training, drawing on practices from large-scale projects such as \emph{GPT-3} (Brown et al., 2020) and \emph{BERT} (Devlin et al., 2019), as well as community efforts like \emph{The Pile} (Gao et al., 2021). Our discussion covers data sourcing, filtering, deduplication, normalization, and the final conversion of text into tokenized sequences.
+
+\section{Data Sources and Collection}\index{data!sources}
+\noindent
+LLMs typically require hundreds of gigabytes to terabytes of text. This sheer volume necessitates collecting data from a variety of sources:
+\begin{itemize}
+    \item \textbf{Web Crawls}\index{web crawls}\index{Common Crawl} (Common Crawl)
+    \item \textbf{Curated Corpora}\index{curated corpora}
+    \item \textbf{Proprietary or Domain-Specific Data}\index{domain-specific data}
+\end{itemize}
+
+\noindent
+\textbf{Importance of Data Diversity.} 
+Having texts from multiple genres (news, conversations, scientific papers, novels, social media) helps the model learn different registers, writing styles, and vocabularies. Overreliance on a single source can bias the model toward that style and limit its coverage.
+
+\section{Filtering and Cleaning}\index{data!filtering}\index{data!cleaning}
+\noindent
+Raw web data often contains noise such as boilerplate text, malformed markup, or offensive content. \textbf{Filtering and cleaning} steps help ensure a usable dataset:
+\begin{itemize}
+    \item \textbf{Language Detection.} Models may be primarily trained in English or target multiple languages. Automated language identification tools (e.g., \texttt{langid.py}) filter out texts misclassified or containing very little in the desired language(s).
+    \item \textbf{Boilerplate Removal.} Web crawls can contain duplicates of navigation bars, ads, or repeated disclaimers. Deduplication scripts or boilerplate detectors (e.g., \texttt{jusText}, \texttt{trafilatura}) strip out non-content text.
+    \item \textbf{Offensive/NSFW Filtering.} Projects like GPT-3 used keyword lists, blocklists, and classifier-based approaches to remove extreme hate speech, sexual content, or personally identifiable information. The exact filtering threshold can vary, balancing open-domain coverage with ethical/legal constraints.
+    \item \textbf{Data Quality Checks.} Very short documents, empty lines, or texts with excessive repetition can be removed. Some pipelines also filter by perplexity scores from smaller "quality-check" language models, discarding outlier documents likely to be nonsensical.
+\end{itemize}
+
+\noindent
+\textbf{Case Example: GPT-3.}  
+In their dataset, OpenAI curated 499 billion tokens. They performed multiple levels of filtering—first removing duplicates, non-English content, and extremely short or low-quality documents, then using domain- and style-based heuristics to refine the final corpus (Brown et al., 2020).
+
+\section{Deduplication}\index{deduplication} and Dataset Overlap
+\noindent
+LLMs can inadvertently learn to \emph{memorize} large chunks of text—particularly if the same passages appear multiple times in the training set. Deduplication is thus essential to:
+\begin{itemize}
+    \item \textbf{Avoid Overfitting.} Repeated sequences artificially reduce the model's training loss on these passages and limit generalization.
+    \item \textbf{Minimize Copyright Risks.} Duplication of copyrighted text increases the chance of regurgitating it verbatim during inference.
+\end{itemize}
+
+\noindent
+\textbf{Approaches to Deduplication.}
+\begin{itemize}
+    \item \emph{Exact String Matching.} Simple but fast approach that finds exact duplicates of entire documents or large n-grams.
+    \item \emph{Approximate/MinHashing.} Employs locality-sensitive hashing to identify near-duplicates. Widely used in large-scale corpora to handle minor edits or formatting differences.
+    \item \emph{Segment-Level Fingerprinting.} Breaks texts into overlapping segments, generating fingerprints for each. This identifies partial duplicates across large corpora more robustly.
+\end{itemize}
+Comprehensive deduplication ensures a more \emph{varied} dataset and reduces the chance of unintentional memorization.
+
+\section{Text Normalization}\index{text normalization} and Preprocessing
+\noindent
+Once filtered, text often undergoes normalization steps to remove extraneous characters and maintain consistent formatting:
+\begin{itemize}
+    \item \textbf{Unicode Normalization.} Converts characters to a standard form (e.g., NFC) to handle accented letters or compatibility forms.
+    \item \textbf{Lowercasing (Optional).} While many modern tokenizers handle case, some pipelines choose to lowercase text (especially for smaller vocabularies). However, lowercasing discards capitalization cues, which can be relevant for named entities or acronyms.
+    \item \textbf{Whitespace Cleanup.} Strips unnecessary line breaks, tabs, or multiple spaces.
+    \item \textbf{URL, Email Removal or Replacement.} In some cases, URLs or emails are replaced with special tokens (\texttt{<URL>}, \texttt{<EMAIL>}) to preserve context without retaining sensitive info.
+\end{itemize}
+
+\noindent
+\textbf{Choosing a Consistent Preprocessing Scheme.}  
+Consistency across the entire dataset is crucial. If half the data is lowercased and the other half is not, the model's vocabulary distribution becomes more complex, leading to potential confusion during training.
+
+\section{Tokenization}\index{tokenization}
+\noindent
+\textbf{Tokenization} converts text into a sequence of discrete tokens that the model can process. Modern LLMs often employ \textbf{subword}\index{subword tokenization} tokenization methods:
+\begin{itemize}
+    \item \textbf{Byte-Pair Encoding}\index{BPE|see {Byte-Pair Encoding}}\index{Byte-Pair Encoding} (BPE)
+    \item \textbf{WordPiece}\index{WordPiece}
+    \item \textbf{SentencePiece}\index{SentencePiece}
+\end{itemize}
+
+\noindent
+\textbf{Vocabulary Size Trade-offs.}
+\begin{itemize}
+    \item A \emph{larger vocabulary} reduces sequence lengths (since words are less frequently split), but can lead to more model parameters (due to embedding tables) and potential data sparsity issues for rare subwords.
+    \item A \emph{smaller vocabulary} makes the model handle more subword splits, potentially capturing morphological variations better, but with longer token sequences and higher computational costs per sample.
+\end{itemize}
+
+\section{Data Sharding}\index{data!sharding} and Batching\index{batching}
+\noindent
+Training an LLM typically involves distributing data across multiple GPUs or TPUs:
+\begin{itemize}
+    \item \textbf{Sharding.} The dataset is often split into "shards"—each shard is a chunk of the dataset stored separately. Large-scale frameworks (e.g., \texttt{Apache Arrow}, \texttt{WebDataset}) streamline sharding and distributed loading.
+    \item \textbf{Curriculum vs. Random Sampling.} While random sampling is the default, some pipelines explore \emph{curriculum learning}, starting with simpler or more relevant text first. However, curriculum schedules can add complexity.
+    \item \textbf{Mini-Batch Construction.} Batches must be efficiently formed from shards to maintain high throughput. Large batch sizes accelerate training but require appropriate learning rate adjustments.
+\end{itemize}
+
+\noindent
+\textbf{Case Example: BERT Pretraining on TPU Pods.}  
+BERT's original training used 16 Cloud TPUs, each processing distinct shards in parallel, with synchronized gradient updates (\emph{Devlin et al. 2019}). This approach required careful pre-shuffling and sharding to maintain data diversity across accelerator replicas.
+
+\section{Validation Sets}\index{validation sets} and Data Splits\index{data!splits}
+\noindent
+To track overfitting and model progress, it is crucial to maintain well-defined validation sets:
+\begin{itemize}
+    \item \textbf{Held-Out Validation.} Randomly sampled from the entire dataset. In large-scale training, this may be a fraction of a percent but still yields millions of tokens for reliable evaluation.
+    \item \textbf{Domain-Specific Splits.} Some practitioners create domain-specific or specialized test sets (e.g., legal or biomedical) to evaluate domain transfer or out-of-distribution robustness.
+    \item \textbf{Public Benchmarks.} Standard tasks (GLUE, SuperGLUE, SQuAD, etc.) are not strictly part of the pretraining corpus but serve as final evaluation to check real-world applicability.
+\end{itemize}
+
+\noindent
+\textbf{Note on "Contamination."}  
+To avoid data leakage (where test examples appear in the training corpus), it is best practice to cross-check validation/test sets against the training data. Efforts like \emph{The Pile} apply rigorous checks to identify overlaps with popular benchmarks.
+
+\section{Ethical and Legal Considerations}\index{ethics}\index{legal considerations}
+\noindent
+As LLMs become more powerful, data preparation intersects with ethical and legal constraints:
+\begin{itemize}
+    \item \textbf{Privacy.} Personal data or sensitive user-generated content must be removed or anonymized to comply with regulations like GDPR. 
+    \item \textbf{Bias Mitigation.} Over-representation of certain demographics or topics can embed social biases. Strategies to counteract bias might involve balancing domains or applying fairness filters.
+    \item \textbf{Copyright.} Large crawls can contain copyrighted material. Dataset creators must decide how to handle or filter copyrighted text to reduce legal risk.
+\end{itemize}
+
+\noindent
+\textbf{Transparency and Documentation.}  
+Initiatives like \emph{Datasheets for Datasets} (Gebru et al.) call for clear documentation of data origins, preprocessing steps, and potential limitations. Such transparency fosters responsible LLM deployment.
+
+\section{Summary and Best Practices}
+\noindent
+Data preparation can be the \textbf{largest engineering effort} in training an LLM. Key takeaways and practices include:
+\begin{itemize}
+    \item \textbf{Diverse Sourcing.} Aim for coverage across multiple domains, languages, and writing styles to build robust general-purpose models.
+    \item \textbf{Thorough Cleaning \& Filtering.} Removing noise and offensive or duplicative content improves both performance and ethical safety.
+    \item \textbf{Careful Tokenization.} Select a suitable subword method and vocabulary size, noting trade-offs between sequence length and representational granularity.
+    \item \textbf{Deduplication.} Prevent memorization and reduce the risk of regurgitating copyrighted or sensitive text.
+    \item \textbf{Ethical Review.} Ensure privacy, fairness, and compliance measures are in place, reflecting the societal impact of LLMs.
+\end{itemize}
+
+\bigskip
+\noindent
+Overall, \textbf{data preparation} lays the foundation upon which Large Language Models are built. While training and model architecture often receive the spotlight, the success—or pitfalls—of an LLM often stem from the quality and diversity of its underlying corpus. By applying robust filtering, scaling up responsibly, and documenting every step, practitioners can create high-caliber datasets that drive state-of-the-art results in NLP. 

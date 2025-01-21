@@ -1,31 +1,63 @@
-\section{Multi-Head Attention}
+\section{Multi-Head Attention}\index{attention!multi-head}\index{multi-head attention}
 \label{sec:multi_head_attention}
 % PROMPT: Provide a small example demonstrating multi-head attention outputs
 
 \noindent
-\textbf{Multi-head attention} extends the concept of the single-head scaled dot-product attention by running multiple attention “heads” in parallel. Each head focuses on a different subspace of the embedding, allowing the model to capture richer relationships between tokens in a sequence. Below, we break down how embeddings are split and recombined, why multiple heads are beneficial, and the formal mathematical notation that underpins multi-head attention.
+Multi-head attention\index{multi-head attention!definition}~\cite{vaswani2017attention,devlin2018bert} extends single-head attention by running multiple attention mechanisms in parallel. Each head can specialize in different aspects of the input, allowing the model to jointly attend to information from different representation subspaces\index{representation subspaces} at different positions.
 
-\subsection{Splitting and Recombining Embeddings}
-Suppose each token in a sequence is represented by an embedding of dimension $d_\text{model}$. In a multi-head attention layer with $h$ heads, we split the embedding into $h$ smaller segments, each of dimension $d_k = d_\text{model} / h$. For each head:
+\subsection{Motivation and Intuition}\index{multi-head attention!motivation}
+\noindent
+The key insight behind multi-head attention lies in its ability to capture diverse relationships between tokens simultaneously. Through specialized pattern recognition\index{pattern recognition}, different heads learn to focus on distinct aspects of the input. Some heads may specialize in syntactic relationships like subject-verb agreement, while others focus on semantic connections between synonyms and antonyms. Certain heads become adept at coreference resolution, tracking pronouns and their antecedents, while others might concentrate on entity relationships between people, places, and organizations.
+
+The parallel processing nature\index{parallel processing} of multi-head attention provides several computational advantages. By maintaining multiple views of the same input, the model can learn different patterns independently. This parallel architecture not only enables efficient computation but also provides ensemble-like benefits from the multiple heads working in concert.
+
+\subsection{Architectural Details}\index{multi-head attention!architecture}
+\noindent
+The multi-head attention mechanism processes queries, keys, and values through multiple parallel heads with careful parameter organization\index{parameter matrices}. Each attention head possesses its own learned projections, with separate transformations for queries, keys, and values. These individual projections are combined through a final output projection that integrates information from all heads. The dimensionality is carefully balanced across heads to maintain computational efficiency while maximizing representational power.
+
+The attention computation\index{attention computation} occurs in parallel across all heads, with each head performing its own scaled dot-product attention operation. This parallel structure allows different heads to develop independent attention patterns, capturing various aspects of the input relationships. The results from all heads are then concatenated and projected to produce the final output.
+
+\subsection{Head Specialization}\index{head specialization}
+\noindent
+Research has revealed distinct patterns of specialization across different attention heads. \textbf{Syntactic heads}\index{syntactic heads} focus on grammatical structure, handling subject-verb dependencies, prepositional phrase attachments, clause boundaries, and part-of-speech patterns. Meanwhile, \textbf{semantic heads}\index{semantic heads} concentrate on meaning-based relationships, managing entity tracking, topic focus, semantic similarity, and contextual disambiguation. Additionally, \textbf{positional heads}\index{positional heads} specialize in spatial relationships, addressing local context attention, long-range dependencies, relative position encoding, and boundary detection.
+
+\subsection{Implementation Considerations}\index{multi-head attention!implementation}
+\noindent
+Several practical aspects significantly influence implementation and performance. The \textbf{number of heads}\index{number of heads} represents a crucial trade-off between expressiveness and computational efficiency. While typical values range from 8 to 32, the optimal number often scales with model size. However, there are diminishing returns beyond certain points. The \textbf{head dimension}\index{head dimension} must balance computation and representation power, typically achieved by dividing the total dimension by the number of heads. This choice impacts both memory usage and computation time, with important implications for model depth.
+
+\textbf{Attention dropout}\index{attention dropout} plays a vital role in regularization. Applied to attention weights, it prevents over-reliance on specific heads and improves generalization. Different dropout rates may be employed across different layers, allowing for fine-tuned regularization throughout the network.
+
+\subsection{Advanced Variations}\index{multi-head attention!variations}
+\noindent
+Recent research has introduced several sophisticated improvements to the basic architecture. \textbf{Sparse attention}\index{sparse attention} mechanisms reduce computation through structured sparsity, implementing local-global attention patterns and adaptive sparsity based on content. These approaches often employ efficient implementation strategies to maximize performance gains.
+
+\textbf{Grouped attention}\index{grouped attention} explores parameter sharing between related heads, implementing hierarchical attention structures and dynamic head grouping. This approach can significantly reduce parameter count while maintaining model capacity. \textbf{Adaptive mechanisms}\index{adaptive mechanisms} take this further by introducing dynamic pruning of attention heads, task-specific head selection, conditional computation, and attention head ensembling.
+
+\subsection{Impact on Model Performance}\index{multi-head attention!performance impact}
+\noindent
+Multi-head attention enhances model performance through several key mechanisms. The \textbf{improved representation}\index{representation improvement} capability enables richer feature capture and better handling of ambiguity, leading to enhanced contextual understanding and more robust embeddings. The architecture's influence on \textbf{training dynamics}\index{training dynamics} manifests in faster convergence and more stable gradients, resulting in better optimization properties and reduced vanishing gradient problems.
+
+The multi-head design also contributes to \textbf{model robustness}\index{model robustness} through redundancy across heads, enabling better generalization and increased fault tolerance. This architectural choice has proven particularly valuable for improving out-of-distribution performance.
+
+% Add relevant citations
+\nocite{michel2019sixteen, voita2019analyzing, raganato2018analysis}
+
+\subsection{Splitting and Recombining Embeddings}\index{embeddings!splitting}\index{embeddings!recombining}
+Suppose each token in a sequence is represented by an embedding of dimension $d_\text{model}$\index{embedding!dimension}. In a multi-head attention layer with $h$ heads\index{attention!number of heads}, we split the embedding into $h$ smaller segments\index{embedding!segments}, each of dimension $d_k = d_\text{model} / h$\index{dimension!per head}. For each head:
 \begin{enumerate}
-    \item Compute its own \textbf{query} ($\mathbf{Q}$), \textbf{key} ($\mathbf{K}$), and \textbf{value} ($\mathbf{V}$) transformations, each of dimension $d_k$.
-    \item Perform scaled dot-product attention using these smaller matrices.
-    \item Obtain an attention output of dimension $d_k$.
+    \item Compute its own \textbf{query} ($\mathbf{Q}$)\index{query matrix}, \textbf{key} ($\mathbf{K}$)\index{key matrix}, and \textbf{value} ($\mathbf{V}$)\index{value matrix} transformations, each of dimension $d_k$.
+    \item Perform scaled dot-product attention\index{attention!scaled dot-product} using these smaller matrices.
+    \item Obtain an attention output\index{attention!output} of dimension $d_k$.
 \end{enumerate}
-After all $h$ heads have computed their respective attention outputs, these outputs are concatenated and passed through a final linear projection back to dimension $d_\text{model}$. This process allows each head to learn a distinct way of attending to the tokens.
+After all $h$ heads have computed their respective attention outputs, these outputs are concatenated\index{concatenation} and passed through a final linear projection\index{linear projection} back to dimension $d_\text{model}$. This process allows each head to learn a distinct way of attending to the tokens\index{attention patterns}.
 
-\subsection{Benefits of Multiple Attention Heads}
+\subsection{Benefits of Multiple Attention Heads}\index{multi-head attention!benefits}
 \noindent
-Running attention in parallel across multiple subspaces yields several advantages:
-\begin{itemize}
-    \item \textbf{Enhanced Representational Power.} Each head can specialize in capturing different types of dependencies (e.g., syntactic, semantic, or positional cues).
-    \item \textbf{Redundancy and Robustness.} With multiple heads, even if one head fails to learn useful representations, others might compensate.
-    \item \textbf{Better Gradient Flow.} Splitting the embedding space lowers the dimensionality of each attention computation, helping stabilize gradients and speeding up training.
-\end{itemize}
+The parallel operation of attention across multiple subspaces yields substantial advantages for sequence processing. The enhanced representational power allows each head to specialize in capturing different types of dependencies\index{dependencies}, whether syntactic\index{syntactic dependencies}, semantic\index{semantic dependencies}, or positional\index{positional cues}. This multi-head architecture provides natural redundancy and robustness\index{redundancy}\index{robustness}, ensuring that even if some heads fail to learn useful representations\index{representations!useful}, others can compensate. Furthermore, splitting the embedding space improves gradient flow\index{gradient flow} by lowering the dimensionality\index{dimensionality} of each attention computation, which helps stabilize gradients\index{gradient stability} and accelerate training\index{training speed}.
 
-\subsection{Mathematical Notation for Multi-Head Attention}
+\subsection{Mathematical Notation for Multi-Head Attention}\index{multi-head attention!mathematical notation}
 \noindent
-Let $\mathbf{X} \in \mathbb{R}^{n \times d_\text{model}}$ be the matrix of input embeddings (one token per row). For each head $i \in \{1, \ldots, h\}$, define parameter matrices:
+Let $\mathbf{X} \in \mathbb{R}^{n \times d_\text{model}}$ be the matrix of input embeddings\index{input embeddings} (one token per row). For each head $i \in \{1, \ldots, h\}$, define parameter matrices\index{parameter matrices}:
 \[
 \mathbf{W}_\mathbf{Q}^{(i)} \in \mathbb{R}^{d_\text{model} \times d_k}, \quad
 \mathbf{W}_\mathbf{K}^{(i)} \in \mathbb{R}^{d_\text{model} \times d_k}, \quad
@@ -35,17 +67,67 @@ The output of head $i$ is:
 \[
 \text{head}_i(\mathbf{X}) = \text{Attention}\!\Bigl(\mathbf{X}\mathbf{W}_\mathbf{Q}^{(i)},\, \mathbf{X}\mathbf{W}_\mathbf{K}^{(i)},\, \mathbf{X}\mathbf{W}_\mathbf{V}^{(i)}\Bigr).
 \]
-After computing all $h$ heads, we concatenate their outputs along the feature dimension:
+After computing all $h$ heads, we concatenate their outputs along the feature dimension\index{feature dimension}:
 \[
 \text{Concat}(\text{head}_1, \ldots, \text{head}_h) \in \mathbb{R}^{n \times (h \cdot d_k)}.
 \]
-Finally, this concatenated vector is projected back to $d_\text{model}$ using a linear transformation $\mathbf{W}_O$:
+Finally, this concatenated vector is projected back to $d_\text{model}$ using a linear transformation $\mathbf{W}_O$\index{output projection}:
 \[
 \text{MultiHead}(\mathbf{X}) 
 = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\,\mathbf{W}_O.
 \]
 \noindent
-Here, $\mathbf{W}_O \in \mathbb{R}^{(h \cdot d_k) \times d_\text{model}}$ combines information from each attention head into the final output dimension. This design fosters multiple perspectives on the input sequence—often resulting in more nuanced and powerful contextual representations. As we will see, multi-head attention underlies not just the encoder and decoder blocks in a Transformer, but also cross-attention mechanisms that tie the two together. 
+Here, $\mathbf{W}_O \in \mathbb{R}^{(h \cdot d_k) \times d_\text{model}}$ combines information from each attention head into the final output dimension. This design fosters multiple perspectives on the input sequence—often resulting in more nuanced and powerful contextual representations.
+
+\begin{pythoncode}[Multi-Head Attention Implementation]
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model, num_heads):
+        """
+        Initialize multi-head attention module
+        Args:
+            d_model: Model dimension (total embedding size)
+            num_heads: Number of attention heads
+        """
+        super().__init__()
+        self.d_model = d_model
+        self.num_heads = num_heads
+        self.d_k = d_model // num_heads  # Dimension per head
+        
+        # Linear projections for Q, K, V for all heads, for all i
+        self.W_q = nn.Linear(d_model, d_model)  # W_Q^(i)
+        self.W_k = nn.Linear(d_model, d_model)  # W_K^(i)
+        self.W_v = nn.Linear(d_model, d_model)  # W_V^(i)
+        
+        # Final output projection
+        # W_O from equation \ref{eq:multihead_final}
+        self.W_o = nn.Linear(d_model, d_model)  
+    
+    def forward(self, x, mask=None):
+        batch_size = x.size(0)
+        
+        # Linear projections and reshape for multiple heads
+        # Split d_model into num_heads * d_k as in equation \ref{eq:mha_params}
+        q = self.W_q(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+        k = self.W_k(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+        v = self.W_v(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+        
+        # Compute attention for each head 
+        scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(self.d_k)
+        if mask is not None:
+            scores = scores.masked_fill(mask == 0, float('-inf'))
+        attention_weights = F.softmax(scores, dim=-1)
+        
+        # Apply attention weights to values
+        head_outputs = torch.matmul(attention_weights, v)
+        
+        # Concatenate and project back to d_model dimensions        
+        output = head_outputs.transpose(1, 2).contiguous() \\
+                 .view(batch_size, -1, self.d_model)
+        return self.W_o(output)
+\end{pythoncode}
+
+\noindent
+As we will see, multi-head attention serves as a fundamental building block not only in the encoder and decoder components but also in the cross-attention mechanisms that bridge these elements together. Recent work has further refined these concepts through efficient variants like sparse attention~\cite{fedus2021switch} and optimized implementations~\cite{dao2022flashattention}.
 
 % Parameter matrices dimensions
 \begin{equation}\label{eq:mha_params}
@@ -69,3 +151,5 @@ Here, $\mathbf{W}_O \in \mathbb{R}^{(h \cdot d_k) \times d_\text{model}}$ combin
 \text{MultiHead}(\mathbf{X}) 
 = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\,\mathbf{W}_O
 \end{equation} 
+
+Recent work has explored efficient variants like sparse attention~\cite{fedus2021switch} and optimized implementations~\cite{dao2022flashattention}.

@@ -1,0 +1,165 @@
+\chapter{Large Language Model Mixture-of-Experts}\index{Mixture-of-Experts}\index{LLM!Mixture-of-Experts}\index{MoE|see{Mixture-of-Experts}}
+\label{chap:moe}
+
+\section{Introduction}
+\noindent
+Mixture-of-Experts (MoE)\index{Mixture-of-Experts!introduction} is a neural network architecture\index{neural network!architecture} that has recently gained significant attention, particularly in the field of large language models (LLMs)\index{LLM!architecture}. MoE models offer a way to dramatically increase model capacity\index{model capacity} without a proportional increase in computational cost\index{computational cost} during inference\index{inference}. This is achieved by conditionally activating\index{conditional activation} only a subset of the network for each input token. This chapter explores the architecture, implementation, and implications of MoE in modern LLMs.
+
+\section{What is Mixture-of-Experts?}
+\label{sec:moe_basics}
+
+\subsection{Core Concepts}
+\noindent
+The core idea behind MoE\index{Mixture-of-Experts!core concepts} is to divide a complex task into smaller, more manageable subtasks\index{subtasks}. Each subtask is handled by a specialized "expert" network\index{expert network}, and a "gating network"\index{gating network} decides which expert(s) should be activated for a given input.
+
+\subsection{Components of an MoE Model}
+\noindent
+An MoE layer typically consists of the following key components:
+\begin{itemize}
+    \item \textbf{Expert Networks:} Feed-forward networks specialized in processing specific aspects of the data
+    \item \textbf{Gating Network:} Determines expert allocation using learned routing functions
+    \item \textbf{Router:} Implements the actual routing mechanism (e.g., top-k routing)
+    \item \textbf{Combiner:} Aggregates expert outputs into the final layer output
+\end{itemize}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm,
+    box/.style={rectangle, draw, minimum width=2cm, minimum height=1cm},
+    expert/.style={rectangle, draw, fill=blue!10, minimum width=1.8cm, minimum height=0.8cm},
+    gate/.style={rectangle, draw, fill=green!10, minimum width=2.5cm, minimum height=0.8cm},
+    combine/.style={rectangle, draw, fill=orange!10, minimum width=2cm, minimum height=0.8cm}
+]
+    % Input
+    \node[box] (input) {Input Token};
+    
+    % Gating Network
+    \node[gate] (gate) [below=of input] {Gating Network};
+    
+    % Experts
+    \node[expert] (exp1) [below left=2cm and 1.5cm of gate] {Expert 1};
+    \node[expert] (exp2) [below=2cm of gate] {Expert 2};
+    \node[expert] (exp3) [below right=2cm and 1.5cm of gate] {Expert N};
+    %\node[text width=1cm] (dots) [below=2cm of gate, xshift=0.8cm] {...};
+    
+    % Combiner
+    \node[combine] (combine) [below=4.5cm of gate] {Combiner};
+    
+    % Output
+    \node[box] (output) [below=of combine] {Output};
+    
+    % Arrows
+    \draw[-latex] (input) -- (gate);
+    \draw[-latex] (gate) -- (exp1);
+    \draw[-latex] (gate) -- (exp2);
+    \draw[-latex] (gate) -- (exp3);
+    \draw[-latex] (exp1) -- (combine);
+    \draw[-latex] (exp2) -- (combine);
+    \draw[-latex] (exp3) -- (combine);
+    \draw[-latex] (combine) -- (output);
+    
+    % Router weights
+    \draw[-latex, dashed] (gate) -- node[right, text width=2cm] {Routing Weights} (exp2);
+\end{tikzpicture}
+\caption{Architecture of a Mixture-of-Experts (MoE) layer. The gating network determines which experts process the input token, and the combiner aggregates their outputs weighted by the routing weights.}
+\label{fig:moe_architecture}
+\end{figure}
+
+\subsection{Mathematical Formulation}
+\noindent
+For input $x$ with $N$ experts $E_1, \ldots, E_N$ and gating network $G$, the output $Y$ is:
+\[
+Y(x) = \sum_{i=1}^{N} G(x)_i \cdot E_i(x)
+\]
+where $G(x)_i$ represents the gating weight for expert $i$.
+
+\section{MoE Architectures in LLMs}
+\label{sec:moe_architectures}
+
+\subsection{Sparse MoE}
+\noindent
+Modern LLMs typically use sparse MoE where only a small subset of experts process each token:
+\begin{itemize}
+    \item \textbf{Top-k Routing:} Only the k highest-scoring experts are activated
+    \item \textbf{Token-level Routing:} Different tokens can be routed to different experts
+    \item \textbf{Expert Capacity:} Managing maximum tokens per expert during training
+\end{itemize}
+
+\subsection{Switch Transformers}
+\noindent
+Switch Transformers~\cite{fedus2021switch} introduce simplified routing where each token is assigned to exactly one expert, reducing routing complexity while maintaining performance.
+
+\subsection{Mixture of Experts in Modern LLMs}
+\noindent
+Recent implementations in production models:
+\begin{itemize}
+    \item \textbf{GShard:} Google's distributed MoE implementation
+    \item \textbf{GLaM:} Efficiently scaled trillion-parameter models
+    \item \textbf{Mixtral 8x7B:} Open-source sparse MoE model
+\end{itemize}
+
+\section{Training MoE Models}
+\label{sec:moe_training}
+
+\subsection{Load Balancing}
+\noindent
+Critical training considerations include:
+\begin{itemize}
+    \item \textbf{Auxiliary Loss:} Encouraging uniform expert utilization
+    \item \textbf{Capacity Factor:} Managing expert overflow during training
+    \item \textbf{Dynamic Expert Selection:} Adapting routing patterns during training
+\end{itemize}
+
+\subsection{Distributed Training}
+\noindent
+Strategies for efficient distributed training:
+\begin{itemize}
+    \item \textbf{Expert Parallelism:} Distributing experts across devices
+    \item \textbf{All-to-All Communication:} Managing expert routing overhead
+    \item \textbf{Load Balancing:} Ensuring efficient device utilization
+\end{itemize}
+
+\section{Benefits and Challenges}
+\label{sec:moe_benefits_challenges}
+
+\subsection{Advantages}
+\begin{itemize}
+    \item \textbf{Conditional Computation:} Activating only relevant parameters
+    \item \textbf{Scalability:} Increasing capacity without proportional compute
+    \item \textbf{Specialization:} Experts focusing on specific language aspects
+    \item \textbf{Parameter Efficiency:} Better performance per active parameter
+\end{itemize}
+
+\subsection{Challenges}
+\begin{itemize}
+    \item \textbf{Training Instability:} Complex optimization dynamics
+    \item \textbf{Communication Overhead:} All-to-all communication costs
+    \item \textbf{Load Balancing:} Ensuring uniform expert utilization
+    \item \textbf{Implementation Complexity:} Complex routing and distributed training
+\end{itemize}
+
+\section{Future Directions}
+\label{sec:moe_future}
+
+\subsection{Research Frontiers}
+\begin{itemize}
+    \item \textbf{Dynamic Architecture:} Adaptive expert addition/removal
+    \item \textbf{Hierarchical Routing:} Multi-level expert selection
+    \item \textbf{Hardware-Aware Design:} Optimizing for specific accelerators
+    \item \textbf{Sparse-to-Dense Distillation:} Knowledge transfer to smaller models
+\end{itemize}
+
+\subsection{Emerging Applications}
+\begin{itemize}
+    \item \textbf{Multi-Modal MoE:} Extending to vision and audio
+    \item \textbf{Task-Specific Experts:} Specialization for different domains
+    \item \textbf{Efficient Deployment:} Edge and mobile optimization
+\end{itemize}
+
+\section{Conclusion}
+\noindent
+MoE architectures represent a significant advancement in scaling LLMs efficiently. By enabling sparse activation and increased model capacity, they offer a promising direction for future model development. While challenges remain in training stability, load balancing, and implementation complexity, ongoing research continues to address these issues, making MoE an increasingly attractive approach for next-generation language models.
+
+% Add relevant citations
+\nocite{shazeer2017outrageously, lepikhin2020gshard, fedus2021switch, du2021glam, mistral2023mixtral}

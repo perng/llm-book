@@ -20,3 +20,13 @@ main-epub
 _minted
 **/*.listing
 llm-book.listing
+*.ind
+*.idx
+*.blg
+*.bbl
+*.bcf
+*.run.xml
+*.log
+*.gz
+*.ilg
+llm-book-blx.bib

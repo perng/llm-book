@@ -1,8 +1,8 @@
-\chapter{Conclusion and Next Steps}
+\chapter{Conclusion and Next Steps}\index{conclusion}\index{next steps}
 \label{chap:conclusion_next_steps}
 
 \noindent
-Throughout this book, we have delved into the theoretical and practical underpinnings of Large Language Models (LLMs)—from their mathematical foundations, through transformer architectures, to advanced training techniques and future research directions. This final chapter revisits the key concepts, offers guidance on implementing these ideas in practice, points to additional resources, and closes with a forward-looking perspective on the field.
+Throughout this book, we have delved into the theoretical\index{theoretical foundations} and practical\index{practical applications} underpinnings of Large Language Models (LLMs)\index{LLM|see {Large Language Model}}\index{Large Language Model}—from their mathematical foundations\index{mathematical foundations}, through transformer architectures\index{transformer!architecture}, to advanced training techniques\index{training!advanced techniques} and future research directions\index{research!future directions}. This final chapter revisits the key concepts\index{key concepts}, offers guidance on implementing these ideas in practice\index{implementation!practical guidance}, points to additional resources\index{resources!additional}, and closes with a forward-looking perspective\index{future outlook} on the field.
 
 % PROMPT: Recap the most important mathematical concepts in a concise manner
 \section{Summary of Key Mathematical Concepts}
@@ -10,13 +10,13 @@ Throughout this book, we have delved into the theoretical and practical underpin
 \begin{itemize}
     \item \textbf{From Linear Algebra to Advanced Optimization.}
     We began by reviewing essential linear algebra (vector spaces, matrix operations, eigenvalues, singular value decomposition) and calculus (gradients, chain rule, Jacobians, Hessians). These core tools underpin neural network training, particularly for parameter updates and backpropagation. We then explored probability distributions, cross-entropy, and scaling laws that connect model size and performance. Together, these mathematical principles frame the entire development and training of LLMs:
-    \[
+    \begin{equation}\label{eq:math_concepts}
       \begin{aligned}
       &\text{Matrix multiplications} \quad(\mathbf{Q}\mathbf{K}^\top,\ \mathbf{X}\mathbf{W}),\\
       &\text{Gradient-based optimization} \quad(\text{SGD}, \text{AdamW}),\\
       &\text{Statistical modeling} \quad(\text{MLE}, \text{Cross-Entropy}, \text{Perplexity}).
       \end{aligned}
-    \]
+    \end{equation}
     These form the backbone of how modern NLP models learn and generalize.
 \end{itemize}
 
@@ -54,7 +54,7 @@ Throughout this book, we have delved into the theoretical and practical underpin
     \item \textbf{Encouraging Readers to Contribute to the Field.} 
     This field thrives on open research, community-driven benchmarks, and collaborative efforts to push boundaries responsibly. Whether you’re drawn to theoretical underpinnings, model architectures, interpretability, or ethical and social implications, \emph{there is ample room for innovation.} We encourage you to stay curious, experiment with new ideas, and actively participate by sharing findings, code, and insights with the broader NLP community.
 \end{itemize}
-
 \bigskip
 \noindent
 \textbf{Final Thoughts.} Large Language Models stand as a testament to how rapidly AI can evolve when driven by both powerful mathematical tools and scalable engineering solutions. We hope this book has provided a comprehensive foundation—from core linear algebra, probability, and optimization, to transformers, attention, and the many specialized techniques that bring them to life at large scales. As you embark on your own research or development journey, remember that each challenge—be it data sparsity, interpretability, or environmental impact—presents an opportunity for further exploration and progress. The story of LLMs is still being written, and we invite you to help shape its future. 
+

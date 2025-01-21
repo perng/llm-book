@@ -2,7 +2,7 @@
 \label{sec:self_attention}
 
 \noindent
-Traditional sequence processing faced several key challenges:
+Traditional sequence processing faced several key challenges~\cite{hochreiter1997long,bahdanau2014neural}:
 \begin{itemize}
     \item \textbf{Sequential bottleneck:} RNNs (Figure~\ref{fig:rnn_architecture}) process tokens one at a time, limiting parallelization
     \item \textbf{Information decay:} Long-range dependencies are hard to maintain through recursive state updates
@@ -59,7 +59,7 @@ Traditional sequence processing faced several key challenges:
 \end{figure}
 
 \noindent
-A core challenge in sequence modeling is capturing \emph{relationships between distant tokens} without relying on sequential processing. \textbf{Self-attention} solves this by allowing each token to attend to any other token in the sequence in \emph{parallel}, bypassing the bottlenecks of recurrence. In practice, self-attention is implemented using \textbf{queries}, \textbf{keys}, and \textbf{values}, which collectively determine how much each token “pays attention” to every other token.
+A core challenge in sequence modeling is capturing \emph{relationships between distant tokens} without relying on sequential processing. \textbf{Self-attention}~\cite{vaswani2017attention} solves this by allowing each token to attend to any other token in the sequence in \emph{parallel}, bypassing the bottlenecks of recurrence. In practice, self-attention is implemented using \textbf{queries}, \textbf{keys}, and \textbf{values}, which collectively determine how much each token “pays attention” to every other token.
 
 \begin{figure}[h]
 \centering
@@ -126,13 +126,13 @@ This query-key-value mechanism can be understood through an analogy to informati
 
 \noindent
 These vectors are produced by learned linear transformations of the input embeddings:
-\[
+\begin{equation}\label{eq:qkv_projection}
     \mathbf{Q} = \mathbf{X}\mathbf{W}^Q, 
     \quad
     \mathbf{K} = \mathbf{X}\mathbf{W}^K, 
     \quad
-    \mathbf{V} = \mathbf{X}\mathbf{W}^V,
-\]
+    \mathbf{V} = \mathbf{X}\mathbf{W}^V
+\end{equation}
 where $\mathbf{X}$ is the matrix of token embeddings, and $\mathbf{W}^Q, \mathbf{W}^K, \mathbf{W}^V$ are learnable parameter matrices. Each transformation serves a specific purpose:
 \begin{itemize}
     \item $\mathbf{W}^Q$ projects tokens into a space that captures what information they need
@@ -202,10 +202,10 @@ Storing the attention scores requires $O(n^2)$ space because we need to maintain
 
 Despite the quadratic cost, self-attention allows \emph{parallel processing} of all tokens and provides a global receptive field. These advantages have led to various \emph{long-sequence} optimizations and variants, such as:
 \begin{itemize}
-    \item Sparse attention patterns
-    \item Linear attention mechanisms
-    \item Sliding window attention
-    \item Hierarchical attention
+    \item Sparse attention patterns~\cite{brown2020language}
+    \item Linear attention mechanisms~\cite{devlin2018bert}
+    \item Sliding window attention~\cite{liu2019roberta}
+    \item Hierarchical attention~\cite{bahdanau2014neural}
 \end{itemize}
 
 However, the fundamental dot-product design remains central to modern Transformer-based architectures.
@@ -227,8 +227,7 @@ M_{ij} = \begin{cases}
 \end{cases}
 \end{equation}
 
-
-\begin{pythoncode}[Scaled Dot-Product Self-Attention and Multi-Head Attention]
+\begin{pythoncode}[Scaled Dot-Product Self-Attention]
 import torch
 import torch.nn.functional as F
 
@@ -259,32 +258,9 @@ def self_attention(query, key, value, mask=None):
     attention_output = torch.matmul(attention_weights, value)
     
     return attention_output, attention_weights
-
-class MultiHeadAttention(nn.Module):
-    def __init__(self, d_model, num_heads):
-        super().__init__()
-        self.d_model = d_model
-        self.num_heads = num_heads
-        self.d_k = d_model // num_heads
-        
-        # Linear projections for Q, K, V
-        self.W_q = nn.Linear(d_model, d_model)
-        self.W_k = nn.Linear(d_model, d_model)
-        self.W_v = nn.Linear(d_model, d_model)
-        self.W_o = nn.Linear(d_model, d_model)
-    
-    def forward(self, x, mask=None):
-        batch_size = x.size(0)
-        
-        # Linear projections and reshape for multiple heads
-        q = self.W_q(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
-        k = self.W_k(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
-        v = self.W_v(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
-        
-        # Compute attention for each head
-        output, weights = self_attention(q, k, v, mask)
-        
-        # Concatenate and project back to d_model dimensions
-        output = output.transpose(1, 2).contiguous().view(batch_size, -1, self.d_model)
-        return self.W_o(output)
 \end{pythoncode}
+
+\noindent
+The self-attention mechanism~\cite{vaswani2017attention,clark2022unified} addresses these challenges through parallel computation of token relationships:
+
+Recent optimizations like FlashAttention~\cite{dao2022flashattention} have significantly improved the efficiency of attention computation.

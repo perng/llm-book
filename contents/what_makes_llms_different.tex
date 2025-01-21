@@ -1,41 +1,41 @@
-\section{What Makes LLMs Different?}
+\section{What Makes LLMs Different?}\index{LLM!differences}\index{language models!large vs small}
 \label{sec:llms_difference}
 % PROMPT: Compare small language models to large language models in more detail
 
 \noindent
-While traditional language models—be they n-gram or smaller neural architectures—have contributed substantially to various NLP tasks, \textbf{Large Language Models (LLMs)} stand apart in terms of scale, performance, and versatility. This section explores some of the key attributes that differentiate LLMs from their predecessors.
+While traditional language models\index{language models!traditional}—be they n-gram\index{n-gram models} or smaller neural architectures\index{neural architectures!small}—have contributed substantially to various NLP tasks\index{NLP tasks}, \textbf{Large Language Models (LLMs)}\index{LLM|see {Large Language Model}}\index{Large Language Model} stand apart in terms of scale\index{scale}, performance\index{performance}, and versatility\index{versatility}. This section explores some of the key attributes that differentiate LLMs from their predecessors\index{model predecessors}.
 
 \begin{itemize}
-    \item \textbf{Scale and Parameter Count.}
-    One of the most defining characteristics of an LLM is its sheer size. These models can contain billions (or even trillions) of parameters, far surpassing the capacity of earlier architectures. Such expansive parameter spaces allow LLMs to store rich linguistic and factual information, leading to improved performance on diverse tasks, from text classification to creative text generation. However, training and serving these enormous models come with steep computational and memory requirements, motivating significant research into distributed systems and model parallelism.
+    \item \textbf{Scale and Parameter Count.}\index{scale!parameters}\index{parameter count}
+    One of the most defining characteristics of an LLM is its sheer size\index{model size}. These models can contain billions\index{parameters!billions} (or even trillions\index{parameters!trillions}) of parameters, far surpassing the capacity of earlier architectures\index{model capacity}. Such expansive parameter spaces\index{parameter space} allow LLMs to store rich linguistic\index{linguistic information} and factual information\index{factual information}, leading to improved performance on diverse tasks\index{task diversity}, from text classification\index{text classification} to creative text generation\index{text generation!creative}. However, training\index{training!computational requirements} and serving\index{model serving} these enormous models come with steep computational\index{computational requirements} and memory requirements\index{memory requirements}, motivating significant research into distributed systems\index{distributed systems} and model parallelism\index{model parallelism}.
 
-    \item \textbf{Data Requirements and Training Pipelines.}
-    LLMs are typically pre-trained on massive text corpora scraped from the web, encompassing a wide variety of styles, domains, and languages. This \emph{pre-training phase} enables the model to learn general-purpose representations of language before being adapted to specific tasks. The construction of such large-scale datasets often involves:
+    \item \textbf{Data Requirements and Training Pipelines.}\index{data requirements}\index{training pipelines}
+    LLMs are typically pre-trained\index{pre-training} on massive text corpora\index{text corpora} scraped from the web\index{web scraping}, encompassing a wide variety of styles\index{text styles}, domains\index{domains}, and languages\index{languages}. This \emph{pre-training phase}\index{pre-training phase} enables the model to learn general-purpose representations\index{representations!general-purpose} of language before being adapted to specific tasks. The construction of such large-scale datasets\index{datasets!large-scale} often involves:
     \begin{itemize}
-        \item Web crawling and cleaning to remove noise and inappropriate content.
-        \item Tokenization or text normalization steps to convert raw text into manageable tokens.
-        \item Automated filtering to reduce duplication and protect privacy where possible.
+        \item Web crawling\index{web crawling} and cleaning\index{data cleaning} to remove noise\index{noise removal} and inappropriate content\index{content filtering}.
+        \item Tokenization\index{tokenization} or text normalization\index{text normalization} steps to convert raw text into manageable tokens\index{tokens}.
+        \item Automated filtering\index{automated filtering} to reduce duplication\index{duplication reduction} and protect privacy\index{privacy protection} where possible.
     \end{itemize}
-    This pre-training pipeline, coupled with advanced optimization methods, allows LLMs to \emph{self-supervise} on unlabeled text, capturing vast contextual and semantic knowledge.
+    This pre-training pipeline\index{pre-training pipeline}, coupled with advanced optimization methods\index{optimization methods}, allows LLMs to \emph{self-supervise}\index{self-supervision} on unlabeled text\index{unlabeled text}, capturing vast contextual\index{contextual knowledge} and semantic knowledge\index{semantic knowledge}.
 
-    \item \textbf{Impact on Natural Language Tasks and Applications.}
-    Once pre-trained, LLMs can be fine-tuned or prompted to perform exceptionally well on a broad array of downstream tasks:
-    \begin{itemize}
-        \item \textit{Reading Comprehension \& Question Answering:} LLMs can interpret context passages and provide answers with a depth that surpasses smaller models.
-        \item \textit{Text Generation \& Summarization:} By leveraging expansive learned knowledge, LLMs produce cohesive summaries and human-like text in various domains.
-        \item \textit{Zero-Shot \& Few-Shot Learning:} Owing to their large pre-training corpus, LLMs can tackle new tasks with minimal or even no explicit examples, demonstrating emergent generalization skills.
-        \item \textit{Creative Tasks:} LLMs’ generative prowess allows them to assist in writing prose, poetry, or even computer code, showcasing impressive degrees of fluency and coherence.
+    \item \textbf{Impact on Natural Language Tasks and Applications.}\index{natural language tasks}\index{applications}
+    Once pre-trained, LLMs can be fine-tuned\index{fine-tuning} or prompted\index{prompting} to perform exceptionally well on a broad array of downstream tasks\index{downstream tasks}:
+    \begin{itemize}[noitemsep]
+        \item \textit{Reading Comprehension \& Question Answering:}\index{reading comprehension}\index{question answering} LLMs can interpret context passages\index{context interpretation} and provide answers with a depth that surpasses smaller models.
+        \item \textit{Text Generation \& Summarization:}\index{text generation}\index{summarization} By leveraging expansive learned knowledge\index{learned knowledge}, LLMs produce cohesive summaries\index{summaries} and human-like text\index{human-like text} in various domains.
+        \item \textit{Zero-Shot \& Few-Shot Learning:}\index{zero-shot learning}\index{few-shot learning} Owing to their large pre-training corpus, LLMs can tackle new tasks with minimal or even no explicit examples, demonstrating emergent generalization skills\index{generalization skills}.
+        \item \textit{Creative Tasks:}\index{creative tasks} LLMs' generative prowess\index{generative capabilities} allows them to assist in writing prose\index{prose writing}, poetry\index{poetry}, or even computer code\index{code generation}, showcasing impressive degrees of fluency\index{fluency} and coherence\index{coherence}.
     \end{itemize}
-    This versatility increasingly positions LLMs as a \emph{universal backbone} for NLP applications, transforming how researchers and practitioners approach natural language tasks.
+    This versatility increasingly positions LLMs as a \emph{universal backbone}\index{universal backbone} for NLP applications\index{NLP applications}, transforming how researchers and practitioners approach natural language tasks.
 
-    \item \textbf{Challenges and Considerations.}
+    \item \textbf{Challenges and Considerations.}\index{challenges}\index{considerations}
     With great power comes great responsibility. LLMs raise pressing concerns around:
     \begin{enumerate}
-        \item \textbf{Ethical and Bias Issues:} LLMs can inadvertently learn and propagate societal biases present in their training data, creating potential harm in real-world applications.
-        \item \textbf{Computational Costs:} Training and deploying LLMs require considerable computational resources, making them less accessible to smaller research groups and increasing the environmental footprint.
-        \item \textbf{Interpretability and Control:} As models grow more complex, understanding their decision-making processes becomes challenging, raising questions about transparency and reliability.
+        \item \textbf{Ethical and Bias Issues:}\index{ethical issues}\index{bias issues} LLMs can inadvertently learn and propagate societal biases\index{societal biases} present in their training data, creating potential harm\index{potential harm} in real-world applications\index{real-world applications}.
+        \item \textbf{Computational Costs:}\index{computational costs} Training and deploying LLMs require considerable computational resources\index{computational resources}, making them less accessible\index{accessibility} to smaller research groups\index{research groups} and increasing the environmental footprint\index{environmental footprint}.
+        \item \textbf{Interpretability and Control:}\index{interpretability}\index{control} As models grow more complex\index{model complexity}, understanding their decision-making processes\index{decision-making} becomes challenging, raising questions about transparency\index{transparency} and reliability\index{reliability}.
     \end{enumerate}
-    These challenges underscore the necessity for ongoing research in techniques like parameter-efficient fine-tuning, model compression, bias detection, and interpretability frameworks.
+    These challenges underscore the necessity for ongoing research in techniques like parameter-efficient fine-tuning\index{parameter-efficient fine-tuning}, model compression\index{model compression}, bias detection\index{bias detection}, and interpretability frameworks\index{interpretability frameworks}.
 
 \end{itemize}
 
