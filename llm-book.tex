@@ -19,17 +19,35 @@
 \usepackage{graphicx}
 \usepackage{tikz}
 \usepackage{pgfplots}
-\usepackage{minted}
 \usepackage{makeidx}
 \usepackage{enumitem}
 \setlist{noitemsep}
 
-% \usepackage{fontspec}
-% \setmainfont{xkcd}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Define the pythoncode environment
+\lstnewenvironment{pythoncode}[1][]
+{
+    \lstset{
+        language=Python,
+        basicstyle=\ttfamily\small,
+        breaklines=true,
+        showstringspaces=false,
+        commentstyle=\color{green!50!black},
+        keywordstyle=\color{blue},
+        stringstyle=\color{red},
+        frame=single,
+        title=#1,
+        numbers=left,
+        numberstyle=\tiny,
+        numbersep=5pt
+    }
+}{}
+
 \usetikzlibrary{positioning, arrows.meta}
 
 \usepackage{tcolorbox}
-\tcbuselibrary{listings,minted,skins,breakable}
 
 \usepackage[
     backend=bibtex,
@@ -41,36 +59,12 @@
 ]{biblatex}
 \addbibresource{references.bib}
 
-\newtcblisting{pythoncode}[1][Python Implementation]{
-  listing engine=minted,
-  colback=blue!5!white,
-  colframe=blue!75!black,
-  listing only,
-  minted language=python,
-  minted options={fontsize=\small,breaklines,autogobble,linenos,numbersep=3mm},
-  breakable,
-  left=5mm,
-  enhanced,
-  title=#1,
-  arc=0.3mm,
-  boxrule=0.8pt
-}
-
 \let\oldtableofcontents\tableofcontents
 \renewcommand{\tableofcontents}{\oldtableofcontents\clearpage}
 
 \title{A Beginner's Guide to Large Language Models}
 \author{Chang-Shing Perng}
 \date{\today}
-
-% \makeatletter
-% \let\old@part\part
-% \renewcommand{\part}[1]{%
-%     \old@part{#1}%
-%     \suppressfloats[t]% Prevent floats from separating title and text
-%     \nopagebreak[4]% Strong request to not break page after title
-% }
-% \makeatother
 
 \makeindex
 
